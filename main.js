@@ -67,6 +67,40 @@ class Ffgazf2 extends Phaser.GameObjects.Image {
   update(t, dt) {}
 }
 
+class Bullet extends Phaser.Physics.Arcade.Image {
+  constructor(scene) {
+    super(scene, 0, 0, "turret")
+    this.speed = 200
+
+    console.log(this)
+
+    // this.setCollideWorldBounds(true)
+    // this.body.onWorldBounds = true
+
+    // this.body.world.on("worldbounds", function (body) {
+    //   // Check if the body's game object is the sprite you are listening for
+    //   if (body.gameObject === this) {
+    //     // Stop physics and render updates for this object
+    //     this.setActive(false)
+    //     this.setVisible(false)
+    //   }
+    // })
+  }
+
+  fire(origin, dir) {
+    this.setActive(true)
+    this.setVisible(true)
+    this.setPosition(origin.x, origin.y)
+    this.setVelocity(dir.x * this.speed, dir.y * this.speed)
+    this.setRotation(dir.angle())
+    console.log(dir.angle())
+  }
+
+  update(time, delta) {
+    // console.log(this.x)
+  }
+}
+
 class Player extends Phaser.Physics.Arcade.Image {
   constructor(scene, x, y, playerNumber) {
     super(scene, x, y, "player")
@@ -90,16 +124,37 @@ class Turret extends Phaser.GameObjects.Image {
     this.speed = 4
 
     this.angleToCenter = null
+    this.vectorToCenter = null
     this.currentPlayer = null
     this.isHorizontal = undefined
+
+    this.bullets = scene.physics.add.group({ classType: Bullet, maxSize: 100, runChildUpdate: true })
+
+    // add 10 bullets
+    for (let i = 0; i < 20; i++) {
+      const bullet = this.bullets.create(0, 0, "turret").setScale(2, 0.3)
+      bullet.setActive(false)
+      bullet.setVisible(false)
+    }
+
+    this.lastFired = 0
+  }
+
+  shoot(time, player) {
+    const bullet = this.bullets.get()
+    // console.log(bullet)
+    if (bullet && time > this.lastFired) {
+      bullet.fire({ x: this.x, y: this.y }, this.bulletDirection)
+      this.lastFired = time + 150
+    }
   }
 
   setAngleToCenter(base) {
+    this.vectorToCenter = new Phaser.Math.Vector2(base.x - this.x, base.y - this.y)
     this.angleToCenter = Phaser.Math.Angle.BetweenPoints(this, base)
     this.isHorizontal = !Number.isInteger(this.angleToCenter / Math.PI)
+    this.bulletDirection = this.vectorToCenter.normalize().negate()
   }
-
-  shootProjectile() {}
 }
 
 class Enemy extends Phaser.Physics.Arcade.Image {
@@ -132,11 +187,10 @@ class Base extends Phaser.GameObjects.Image {
   }
 }
 
-var WorldScene = new Phaser.Class({
-  Extends: Phaser.Scene,
-  initialize: function WorldScene() {
-    Phaser.Scene.call(this, { key: "WorldScene" })
-  },
+class WorldScene extends Phaser.Scene {
+  constructor() {
+    super("WorldScene")
+  }
 
   createTurrets() {
     this.turrets = this.physics.add.group({ classType: Turret, runChildUpdate: true })
@@ -149,17 +203,17 @@ var WorldScene = new Phaser.Class({
     this.turrets.children.iterate((turret) => {
       turret.setAngleToCenter(this.base)
     })
-  },
+  }
 
   createPlayers() {
-    this.players = this.add.group({ classType: Player, runChildUpdate: true })
+    this.players = this.physics.add.group({ classType: Player, runChildUpdate: true })
 
     this.players.create(center.x - this.base.size / 5, center.y, 1).setScale(0.5)
     this.players.create(center.x + this.base.size / 5, center.y, 2).setScale(0.5)
-  },
+  }
 
-  preload: function () {},
-  create: function () {
+  preload() {}
+  create() {
     // add background
     this.add.image(center.x, center.y, "bg").setScale(resolutionMultiplicator)
 
@@ -173,18 +227,19 @@ var WorldScene = new Phaser.Class({
     })
 
     this.cursors = this.input.keyboard.createCursorKeys()
-    this.spaceBar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E)
-  },
+    this.keyE = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E)
+    this.spaceBar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
+  }
 
-  enterTurret: function (player, turret) {
+  enterTurret(player, turret) {
     player.activeTurretIndex = turret.index
     turret.currentPlayer = player.playerNumber
 
     player.setPosition(turret.x, turret.y)
     player.setRotation(turret.angleToCenter - Math.PI / 2)
-  },
+  }
 
-  leaveTurret: function (player) {
+  leaveTurret(player) {
     const turret = this.turrets.children.entries[player.activeTurretIndex]
 
     player.activeTurretIndex = null
@@ -197,9 +252,9 @@ var WorldScene = new Phaser.Class({
 
     player.setPosition(turret.x + unitVector.x * leaveDistance, turret.y + unitVector.y * leaveDistance)
     player.setRotation(0)
-  },
+  }
 
-  handlePlayerControls: function (player) {
+  handlePlayerControls(player) {
     // Horizontal movement
     if (this.cursors.left.isDown) {
       player.body.setVelocityX(-player.speed)
@@ -212,9 +267,9 @@ var WorldScene = new Phaser.Class({
     } else if (this.cursors.down.isDown) {
       player.body.setVelocityY(player.speed)
     }
-  },
+  }
 
-  handleTurretControls: function (player) {
+  handleTurretControls(player) {
     const turret = this.turrets.children.entries[player.activeTurretIndex]
 
     if (turret.isHorizontal) {
@@ -236,26 +291,26 @@ var WorldScene = new Phaser.Class({
 
     player.x = turret.x
     player.y = turret.y
-  },
+  }
 
-  handleInputs: function () {
+  handleInputs(time) {
     this.players.children.each((player) => {
       player.body.setVelocity(0)
       if (player.playerNumber === 2) return
 
       if (player.activeTurretIndex !== null) {
         this.handleTurretControls(player)
-        if (this.spaceBar.isDown) this.leaveTurret(player)
+        if (this.spaceBar.isDown) this.turrets.children.entries[player.activeTurretIndex].shoot(time, player)
+        if (this.keyE.isDown) this.leaveTurret(player)
       } else {
         this.handlePlayerControls(player)
       }
     })
-  },
-
-  update: function () {
-    this.handleInputs()
-  },
-})
+  }
+  update(time, delta) {
+    this.handleInputs(time)
+  }
+}
 
 const config = {
   type: Phaser.AUTO,
