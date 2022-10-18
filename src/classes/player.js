@@ -14,14 +14,14 @@ class Player extends Phaser.Physics.Arcade.Image {
 
     this.linearPosition = linearPosition
 
-    this.bullets = scene.physics.add.group({ classType: Bullet, maxSize: 100, runChildUpdate: true })
+    this.bullets = scene.physics.add.group({ classType: Bullet, runChildUpdate: true })
 
     // add 10 bullets
-    for (let i = 0; i < 20; i++) {
-      const bullet = this.bullets.create(0, 0, "turret").setScale(2, 0.3)
-      bullet.setActive(false)
-      bullet.setVisible(false)
-    }
+    // for (let i = 0; i < 20; i++) {
+    //   const bullet = this.bullets.create(0, 0, "turret").setScale(2, 0.3)
+    //   bullet.setActive(false)
+    //   bullet.setVisible(false)
+    // }
 
     this.cannonRotation = 0
 
@@ -75,7 +75,7 @@ class Player extends Phaser.Physics.Arcade.Image {
       let bulletDirection = new Phaser.Math.Vector2(0, 1).rotate(this.cannonRotation).normalize().negate()
 
       bullet.fire({ x: this.x, y: this.y }, bulletDirection)
-      this.lastFired = time + 150
+      this.lastFired = time + 550
     }
   }
 }
