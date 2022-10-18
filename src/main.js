@@ -8,6 +8,8 @@ import bgImg from "./assets/img/bg.png"
 import playerImg from "./assets/img/player.png"
 import turretImg from "./assets/img/turret.png"
 import { Player } from "./classes/player"
+import { Base } from "./classes/base"
+import { gamepadEmulator, player1axis, player2axis } from "./axis"
 
 import { resolutionMultiplicator, center } from "./constants"
 
@@ -28,9 +30,8 @@ class BootScene extends Phaser.Scene {
 }
 
 class Enemy extends Phaser.Physics.Arcade.Image {
-  constructor(scene, x, y, turretIndex) {
+  constructor(scene, x, y) {
     super(scene, x, y, "turret")
-    this.speed = 4
 
     this.targetPosition = null
   }
@@ -43,21 +44,13 @@ class Enemy extends Phaser.Physics.Arcade.Image {
     // go to base center continuously
     // bump into base
     // if colliding with base, deal damage
+    //    this.cameras.main.shake(50, 0.01)
   }
-}
 
-class Base extends Phaser.GameObjects.Image {
-  constructor(scene, x, y) {
-    super(scene, x, y, "base")
-
-    // add base
-    this.baseScale = 1
-    this.width = 654 * this.baseScale
-    this.height = this.width / 2
-
-    this.pos = { x: center.x, y: 1440 * resolutionMultiplicator - this.height / 2 }
-
-    scene.add.image(center.x, 1440 * resolutionMultiplicator - this.height / 2, "base").setScale(this.baseScale)
+  kill() {
+    this.setActive(false)
+    this.setVisible(false)
+    this.body.stop()
   }
 }
 
@@ -77,6 +70,12 @@ class WorldScene extends Phaser.Scene {
       player.setPositionFromLinear()
     })
   }
+  createEnemies() {
+    this.enemies = this.physics.add.group({ classType: Enemy, runChildUpdate: true })
+
+    this.enemies.create(300, 300)
+    this.enemies.create(600, 300)
+  }
 
   create() {
     // add background
@@ -85,34 +84,188 @@ class WorldScene extends Phaser.Scene {
     this.base = new Base(this, center.x, center.y)
 
     this.createPlayers()
+    this.createEnemies()
 
     this.cursors = this.input.keyboard.createCursorKeys()
     this.keyE = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E)
     this.spaceBar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
+
+    this.addAxisControls()
+    this.addEnemyBulletOverlapCheck()
+    this.createUI()
   }
 
-  handleControls(player) {
+  createUI() {
+    this.shieldCDText = this.add.text(0, 0, "shield cd: 0", { font: "25px Courier", fill: "#00ff00" })
+  }
+
+  addEnemyBulletOverlapCheck() {
+    this.physics.add.overlap(
+      this.players.children.entries[0].bullets,
+      this.enemies,
+      this.handleEnemyKills,
+      this.checkBulletVsEnemy,
+      this
+    )
+    this.physics.add.overlap(
+      this.players.children.entries[1].bullets,
+      this.enemies,
+      this.handleEnemyKills,
+      this.checkBulletVsEnemy,
+      this
+    )
+  }
+
+  addAxisControls() {
+    this.joystickX = {
+      1: 0,
+      2: 0,
+    }
+    this.isShooting = {
+      1: false,
+      2: false,
+    }
+
+    this.isShielding = {
+      1: false,
+      2: false,
+    }
+
+    // value in seconds
+
+    // min time between shield
+    this.shieldCooldown = 2
+    // time available for user to press shield button simultaneously
+    this.shieldSyncWindow = 1
+    // shield duration
+    this.shieldDuration = 2
+
+    this.hasStartedSyncWindow = false
+    this.shieldSyncRemainingTime = this.shieldSyncWindow
+    this.shieldRemainingCooldown = 0
+
+    player1axis.addEventListener("joystick:move", this.player1JoystickMoveHandler.bind(this))
+    player2axis.addEventListener("joystick:move", this.player2JoystickMoveHandler.bind(this))
+
+    const keyDownHandler = this.keyDownHandler.bind(this)
+    player1axis.addEventListener("keydown", (e) => keyDownHandler(e, 1))
+    player2axis.addEventListener("keydown", (e) => keyDownHandler(e, 2))
+
+    const keyUpHandler = this.keyUpHandler.bind(this)
+    player1axis.addEventListener("keyup", (e) => keyUpHandler(e, 1))
+    player2axis.addEventListener("keyup", (e) => keyUpHandler(e, 2))
+  }
+
+  player1JoystickMoveHandler(e) {
+    this.joystickX["1"] = e.position.x
+  }
+  player2JoystickMoveHandler(e) {
+    this.joystickX["2"] = e.position.x
+  }
+
+  keyDownHandler(e, playerNumber) {
+    if (e.key === "a") this.isShooting[playerNumber] = true
+    if (e.key === "x") {
+      if (this.shieldRemainingCooldown === 0) {
+        this.isShielding[playerNumber] = true
+        console.log("set shielding true")
+      }
+    }
+  }
+
+  keyUpHandler(e, playerNumber) {
+    if (e.key === "a") this.isShooting[playerNumber] = false
+  }
+
+  handleControls(player, time) {
     const otherPlayerLinear = this.players.children.entries.filter((p) => p.playerNumber !== player.playerNumber)[0]
       .linearPosition
+
+    // controller / axis controls
+    if (this.joystickX[player.playerNumber] !== 0) {
+      player.movePlayer(this.joystickX[player.playerNumber], otherPlayerLinear)
+    }
+
+    if (this.isShooting[player.playerNumber]) {
+      player.shoot(time)
+    }
+
+    // keyboard controls
     if (this.cursors.left.isDown) {
       player.movePlayer(-1, otherPlayerLinear)
     } else if (this.cursors.right.isDown) {
       player.movePlayer(1, otherPlayerLinear)
     }
+    if (this.spaceBar.isDown) player.shoot(time)
   }
 
-  handleInputs(time) {
-    this.players.children.each((player) => {
-      player.body.setVelocity(0)
-      if (player.playerNumber === 2) return
+  handleInputs(time, delta) {
+    gamepadEmulator.update()
 
-      this.handleControls(player)
-      if (this.spaceBar.isDown) player.shoot(time)
-      if (this.keyE.isDown) this.leaveTurret(player)
+    this.players.children.each((player) => {
+      this.handleControls(player, time)
     })
   }
+
+  checkBulletVsEnemy(bullet, enemy) {
+    return bullet.active && enemy.active
+  }
+
+  handleEnemyKills(bullet, enemy) {
+    bullet.kill()
+    enemy.kill()
+  }
+
   update(time, delta) {
-    this.handleInputs(time)
+    this.handleInputs(time, delta)
+
+    // shield timer handling
+
+    const reset = () => {
+      this.shieldSyncRemainingTime = 0
+      this.hasStartedSyncWindow = false
+      this.isShielding = {
+        1: false,
+        2: false,
+      }
+      this.shieldRemainingCooldown = this.shieldCooldown
+    }
+
+    if (this.shieldRemainingCooldown > 0) {
+      this.shieldRemainingCooldown -= delta / (this.shieldCooldown * 1000)
+
+      this.shieldCDText.setText(`shield cd: ${this.shieldRemainingCooldown.toFixed(2)}`)
+      this.shieldRemainingCooldown = Math.max(this.shieldRemainingCooldown, 0)
+    }
+
+    if (!this.base.isShieldActivated || this.shieldRemainingCooldown > 0) {
+      // sync window trigger
+      if (!!(this.isShielding["1"] ^ this.isShielding["2"]) && !this.hasStartedSyncWindow) {
+        console.log("start !")
+        this.shieldSyncRemainingTime = 1
+        this.hasStartedSyncWindow = true
+      }
+
+      if (this.hasStartedSyncWindow) {
+        // sync window countdown
+        if (this.shieldSyncRemainingTime > 0) {
+          this.shieldSyncRemainingTime -= delta / (this.shieldSyncWindow * 1000)
+          // console.log(this.shieldSyncRemainingTime)
+          this.shieldSyncRemainingTime = Math.max(this.shieldSyncRemainingTime, 0)
+        }
+
+        // failed sync
+        if (this.shieldSyncRemainingTime <= 0) {
+          reset()
+        }
+
+        // successful sync
+        if (this.isShielding["1"] && this.isShielding["2"]) {
+          this.base.setShield(this.shieldDuration)
+          reset()
+        }
+      }
+    }
   }
 }
 

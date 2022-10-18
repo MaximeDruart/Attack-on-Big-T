@@ -6,7 +6,7 @@ class Player extends Phaser.Physics.Arcade.Image {
     super(scene, x, y, "turret")
 
     this.playerNumber = playerNumber
-    this.speed = 0.01
+    this.speed = 0.005
 
     scene.add.existing(this)
     scene.physics.add.existing(this)
@@ -14,7 +14,7 @@ class Player extends Phaser.Physics.Arcade.Image {
 
     this.linearPosition = linearPosition
 
-    this.bullets = scene.physics.add.group({ classType: Bullet, runChildUpdate: true })
+    this.bullets = scene.physics.add.group({ classType: Bullet, maxSize: 30, runChildUpdate: true })
 
     // add 10 bullets
     // for (let i = 0; i < 20; i++) {
@@ -26,6 +26,11 @@ class Player extends Phaser.Physics.Arcade.Image {
     this.cannonRotation = 0
 
     this.lastFired = 0
+
+    this.cannonStats = {
+      fireDelay: 150,
+      fireSpeed: 800,
+    }
   }
 
   addedToScene() {
@@ -55,7 +60,7 @@ class Player extends Phaser.Physics.Arcade.Image {
     this.tempLinear = this.linearPosition + dir * this.speed
 
     // would need to be calculated from the actual width of the turret and the total width to get the accurate linear value but hey we got 3 days
-    const turretWidthInLinear = 0.02
+    const turretWidthInLinear = 0.03
 
     let canMove =
       this.tempLinear + turretWidthInLinear < otherPlayerLinear - turretWidthInLinear ||
@@ -69,13 +74,14 @@ class Player extends Phaser.Physics.Arcade.Image {
   }
 
   shoot(time) {
+    if (time < this.lastFired) return
     const bullet = this.bullets.get()
-    if (bullet && time > this.lastFired) {
+    if (bullet) {
       // up vector, rotate it by the angle of the cannon, the normalize it so speed can be applied and reverse to point outwards
       let bulletDirection = new Phaser.Math.Vector2(0, 1).rotate(this.cannonRotation).normalize().negate()
 
-      bullet.fire({ x: this.x, y: this.y }, bulletDirection)
-      this.lastFired = time + 550
+      bullet.fire({ x: this.x, y: this.y }, bulletDirection, this.cannonStats.fireSpeed)
+      this.lastFired = time + this.cannonStats.fireDelay
     }
   }
 }
