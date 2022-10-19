@@ -1,4 +1,6 @@
-export default function (scene, sounds) {
+export default function (scene, sounds, volume) {
     let audioIndex = Math.floor(Math.random() * sounds.length);
-    return scene.sound.play(sounds[audioIndex])
+    let sound = scene.sound.add(sounds[audioIndex])
+    sound.setVolume(volume)
+    return sound.play()
 }

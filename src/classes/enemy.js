@@ -40,7 +40,7 @@ class Enemy extends Phaser.Physics.Arcade.Image {
 
   kill() {
     console.log(this.scene)
-    randomAudio(this.scene, ['explosion_two', 'explosion_three'])
+    randomAudio(this.scene, ['explosion_two', 'explosion_three'], 0.3)
     if (this.stats.range === RANGED) {
       clearInterval(this.shootInterval)
       this.bullets.clear(true, true)
