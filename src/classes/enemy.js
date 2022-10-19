@@ -1,19 +1,23 @@
 import { enemyData } from "../enemyData"
 import { ranges } from "../constants"
-const { MELEE, RANGED } = ranges
+const { RANGED } = ranges
 import { Bullet } from "./bullet"
 
-class Enemy extends Phaser.Physics.Arcade.Image {
+class Enemy extends Phaser.Physics.Arcade.Sprite {
   // voir avec maxime si enemy = chaser ou si autre classe EnemyChaser qui extend Enemy
   constructor(scene, x, y, name) {
     super(scene, x, y, "turret")
     this.targetPosition = null
 
     this.stats = enemyData.find((enemy) => enemy.name === name)
+    this.hp = this.stats.hp
 
     if (this.stats.range === RANGED) {
       this.bullets = scene.physics.add.group({ classType: Bullet, maxSize: 100, runChildUpdate: true })
-      this.shootInterval = setInterval(this.rangeAttack.bind(this), this.stats.attackDelay * 1000)
+      this.shootInterval = setInterval(
+        this.rangeAttack.bind(this),
+        this.stats.attackDelay * Phaser.Math.Between(900, 1100)
+      )
     }
   }
 
@@ -35,6 +39,21 @@ class Enemy extends Phaser.Physics.Arcade.Image {
     direction.normalize().scale(speed)
 
     this.body.setVelocity(direction.x, direction.y)
+  }
+
+  registerHit(hitDamage = 1) {
+    // sprite flash
+    this.scene.tweens.addCounter({
+      from: 255,
+      to: 0,
+      duration: 100,
+      yoyo: true,
+      onUpdate: (tween) => {
+        const value = Math.floor(tween.getValue())
+        this.setTint(Phaser.Display.Color.GetColor(value, value, 255))
+      },
+    })
+    this.hp -= hitDamage
   }
 
   kill() {

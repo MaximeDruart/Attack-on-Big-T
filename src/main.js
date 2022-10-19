@@ -75,8 +75,8 @@ class WorldScene extends Phaser.Scene {
 
     this.waveEnemyCount = enemies.length
 
-    const radius = 1000
-    const distanceRandomness = 600
+    const radius = 1100
+    const distanceRandomness = 400
 
     enemies.forEach((enemy) => {
       const angle = Phaser.Math.DegToRad(Phaser.Math.Between(10, 170) + 180)
@@ -141,14 +141,14 @@ class WorldScene extends Phaser.Scene {
     this.physics.add.overlap(
       this.players.children.entries[0].bullets,
       this.enemies,
-      this.handleEnemyKills,
+      this.handleEnemyHit,
       this.checkBulletVsEnemy,
       this
     )
     this.physics.add.overlap(
       this.players.children.entries[1].bullets,
       this.enemies,
-      this.handleEnemyKills,
+      this.handleEnemyHit,
       this.checkBulletVsEnemy,
       this
     )
@@ -248,11 +248,14 @@ class WorldScene extends Phaser.Scene {
     return bullet.active && enemy.active
   }
 
-  handleEnemyKills(bullet, enemy) {
+  handleEnemyHit(bullet, enemy) {
     bullet.kill()
-    enemy.kill()
-    this.totalKills++
-    this.waveKills++
+    enemy.registerHit()
+    if (enemy.hp === 0) {
+      enemy.kill()
+      this.totalKills++
+      this.waveKills++
+    }
   }
 
   objectIsCollidingWithBase(object) {
@@ -317,14 +320,12 @@ class WorldScene extends Phaser.Scene {
     // check for enemy hit
     this.enemies.children.each((enemy) => {
       if (this.objectIsCollidingWithBase(enemy)) {
-        this.cameras.main.shake(10, 0.01)
         this.base.takeDamage(enemy.stats.damage)
         enemy.kill()
       }
       if (!!enemy.bullets) {
         enemy.bullets.children.each((bullet) => {
           if (this.objectIsCollidingWithBase(bullet)) {
-            this.cameras.main.shake(10, 0.01)
             this.base.takeDamage(enemy.stats.damage)
             bullet.kill()
           }
