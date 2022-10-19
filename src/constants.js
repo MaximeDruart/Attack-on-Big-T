@@ -6,4 +6,9 @@ const resolutionMultiplicator = currentResolution / ARCADE_RESOLUTION
 
 const center = { x: (2560 * resolutionMultiplicator) / 2, y: (1440 * resolutionMultiplicator) / 2 }
 
-export { resolutionMultiplicator, center }
+const ranges = {
+  RANGED: "RANGED",
+  MELEE: "MELEE",
+}
+
+export { resolutionMultiplicator, center, ranges }
