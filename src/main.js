@@ -7,11 +7,17 @@ import baseImg from "./assets/img/base.png"
 import bgImg from "./assets/img/bg.png"
 import playerImg from "./assets/img/player.png"
 import turretImg from "./assets/img/turret.png"
+import laser_one from "./assets/audios/laser_one.mp3"
+import laser_two from "./assets/audios/laser_two.mp3";
+import explosion_one from "./assets/audios/explosion_one.mp3";
+import explosion_two from "./assets/audios/explosion_two.mp3";
+import explosion_three from "./assets/audios/explosion_three.mp3";
 import { Player } from "./classes/player"
 import { Base } from "./classes/base"
 import { gamepadEmulator, player1axis, player2axis } from "./axis"
 
 import { resolutionMultiplicator, center } from "./constants"
+import randomAudio from "./randomAudio.js";
 
 class BootScene extends Phaser.Scene {
   constructor() {
@@ -23,6 +29,12 @@ class BootScene extends Phaser.Scene {
     this.load.image("bg", bgImg)
     this.load.image("player", playerImg)
     this.load.image("turret", turretImg)
+
+    this.load.audio("laser_one", laser_one)
+    this.load.audio("laser_two", laser_two)
+    this.load.audio("explosion_one", explosion_one)
+    this.load.audio("explosion_two", explosion_two)
+    this.load.audio("explosion_three", explosion_three)
   }
   create() {
     this.scene.start("WorldScene")
@@ -81,6 +93,7 @@ class Enemy extends Phaser.Physics.Arcade.Image { // voir avec maxime si enemy =
   kill() {
     this.setActive(false)
     this.setVisible(false)
+    randomAudio(this.scene, ["explosion_three", 'explosion_two'])
     this.body.stop()
   }
 }
@@ -88,7 +101,6 @@ class Enemy extends Phaser.Physics.Arcade.Image { // voir avec maxime si enemy =
 class RangeEnemy extends Phaser.Physics.Arcade.Image { // Draft Range enemy 
   constructor(scene, x, y) {
     super(scene, x, y, "turret")
-    console.log(this.body);
     this.body.velocity.y = Phaser.Math.Between(50, 100); // TODO: Problem this.body is null in console 
     // this.targetPosition = null
     
@@ -183,7 +195,7 @@ class WorldScene extends Phaser.Scene {
   }
 
   addEnemyBaseOverlapCheck() {
-    console.log(this.enemies, this.base)
+    //console.log(this.enemies, this.base)
     // this.physics.add.overlap(this.base, this.enemies, (base, enemy) => {
     //   console.log("overlap !!")
     //   base.takeDamage(1)
