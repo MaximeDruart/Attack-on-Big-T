@@ -7,6 +7,7 @@ import baseImg from "./assets/img/base.png"
 import bgImg from "./assets/img/bg.png"
 import playerImg from "./assets/img/player.png"
 import turretImg from "./assets/img/turret.png"
+import bulletImg from "./assets/img/bullet.png"
 import { Player } from "./classes/player"
 import { Base } from "./classes/base"
 import { Enemy } from "./classes/enemy"
@@ -25,6 +26,7 @@ class BootScene extends Phaser.Scene {
     this.load.image("bg", bgImg)
     this.load.image("player", playerImg)
     this.load.image("turret", turretImg)
+    this.load.image("bullet", bulletImg)
   }
   create() {
     this.scene.start("WorldScene")
@@ -73,12 +75,13 @@ class WorldScene extends Phaser.Scene {
 
     this.waveEnemyCount = enemies.length
 
-    const radius = 800
+    const radius = 1000
+    const distanceRandomness = 600
 
     enemies.forEach((enemy) => {
       const angle = Phaser.Math.DegToRad(Phaser.Math.Between(10, 170) + 180)
       let pos = new Phaser.Math.Vector2(0, 0)
-      pos = pos.setToPolar(angle, radius + Phaser.Math.Between(0, 700))
+      pos = pos.setToPolar(angle, radius + Phaser.Math.Between(0, distanceRandomness))
       pos = {
         x: pos.x + this.base.pos.x,
         y: pos.y + this.base.pos.y + this.base.height / 2,
@@ -252,9 +255,9 @@ class WorldScene extends Phaser.Scene {
     this.waveKills++
   }
 
-  enemyIsCollidingWithBase(enemy) {
-    if (!enemy.active) return false
-    const { x, y } = enemy
+  objectIsCollidingWithBase(object) {
+    if (!object.active) return false
+    const { x, y } = object
 
     const distance = Phaser.Math.Distance.Between(x, y, this.base.pos.x, this.base.pos.y + this.base.height / 2)
 
@@ -313,12 +316,19 @@ class WorldScene extends Phaser.Scene {
 
     // check for enemy hit
     this.enemies.children.each((enemy) => {
-      if (this.enemyIsCollidingWithBase(enemy)) {
+      if (this.objectIsCollidingWithBase(enemy)) {
         this.cameras.main.shake(10, 0.01)
-
-        console.log(enemy.stats.damage)
         this.base.takeDamage(enemy.stats.damage)
         enemy.kill()
+      }
+      if (!!enemy.bullets) {
+        enemy.bullets.children.each((bullet) => {
+          if (this.objectIsCollidingWithBase(bullet)) {
+            this.cameras.main.shake(10, 0.01)
+            this.base.takeDamage(enemy.stats.damage)
+            bullet.kill()
+          }
+        })
       }
     })
 
@@ -340,7 +350,7 @@ const config = {
     default: "arcade",
     arcade: {
       gravity: { y: 0 },
-      debug: true,
+      debug: false,
     },
   },
   scene: [BootScene, WorldScene],

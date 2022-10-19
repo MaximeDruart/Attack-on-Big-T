@@ -2,15 +2,17 @@ import { resolutionMultiplicator } from "../constants"
 
 class Bullet extends Phaser.Physics.Arcade.Image {
   constructor(scene) {
-    super(scene, 0, 0, "turret")
+    super(scene, 0, 0, "bullet")
   }
 
   fire(origin, dir, speed) {
     this.setActive(true)
     this.setVisible(true)
 
+    // this.setSize(20,20)
+
     this.setPosition(origin.x, origin.y)
-    this.setRotation(dir.angle())
+    this.setRotation(dir.angle() + Math.PI / 2)
 
     this.setVelocity(dir.x * speed, dir.y * speed)
   }
