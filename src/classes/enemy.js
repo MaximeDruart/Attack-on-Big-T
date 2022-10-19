@@ -2,6 +2,7 @@ import { enemyData } from "../enemyData"
 import { ranges } from "../constants"
 const { MELEE, RANGED } = ranges
 import { Bullet } from "./bullet"
+import randomAudio from "../randomAudio.js";
 
 class Enemy extends Phaser.Physics.Arcade.Image {
   // voir avec maxime si enemy = chaser ou si autre classe EnemyChaser qui extend Enemy
@@ -38,6 +39,8 @@ class Enemy extends Phaser.Physics.Arcade.Image {
   }
 
   kill() {
+    console.log(this.scene)
+    randomAudio(this.scene, ['explosion_two', 'explosion_three'])
     if (this.stats.range === RANGED) {
       clearInterval(this.shootInterval)
       this.bullets.clear(true, true)

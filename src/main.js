@@ -8,6 +8,10 @@ import bgImg from "./assets/img/bg.png"
 import playerImg from "./assets/img/player.png"
 import turretImg from "./assets/img/turret.png"
 import bulletImg from "./assets/img/bullet.png"
+import laser_one from './assets/audios/laser_one.mp3'
+import laser_two from './assets/audios/laser_two.mp3'
+import explosion_two from './assets/audios/explosion_two.mp3'
+import explosion_three from './assets/audios/explosion_three.mp3'
 import { Player } from "./classes/player"
 import { Base } from "./classes/base"
 import { Enemy } from "./classes/enemy"
@@ -27,6 +31,11 @@ class BootScene extends Phaser.Scene {
     this.load.image("player", playerImg)
     this.load.image("turret", turretImg)
     this.load.image("bullet", bulletImg)
+
+    this.load.audio('laser_one', laser_one)
+    this.load.audio('laser_two', laser_two)
+    this.load.audio('explosion_two', explosion_two)
+    this.load.audio('explosion_three', explosion_three)
   }
   create() {
     this.scene.start("WorldScene")
