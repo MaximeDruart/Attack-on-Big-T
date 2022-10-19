@@ -27,12 +27,15 @@ class BootScene extends Phaser.Scene {
   create() {
     this.scene.start("WorldScene")
   }
+
+  startWorldScene() {
+    this.scene.start("WorldScene")
+  }
 }
 
-class Enemy extends Phaser.Physics.Arcade.Image {
+class Enemy extends Phaser.Physics.Arcade.Image { // voir avec maxime si enemy = chaser ou si autre classe EnemyChaser qui extend Enemy
   constructor(scene, x, y) {
     super(scene, x, y, "turret")
-
     this.targetPosition = null
   }
 
@@ -45,12 +48,50 @@ class Enemy extends Phaser.Physics.Arcade.Image {
     // bump into base
     // if colliding with base, deal damage
     //    this.cameras.main.shake(50, 0.01)
+
+    // With this code, chaser enemies will move down the screen. 
+    // However, as soon as it is within 320 pixels (arbitrary, edit TARGET_CHASING_DISTANCE with wished distancer) to the player, it will start chasing the player
+
+    // if (!this.getData("isDead") && this.scene.player) {
+      // if (Phaser.Math.Distance.Between(
+      //   this.x,
+      //   this.y,
+      //   this.scene.player.x, // remplacer par target position 
+      //   this.scene.player.y // 
+      // ) < this.TARGET_CHASING_DISTANCE) {
+
+      // }
+      // this.state = this.states.CHASE;
+
+      // if (this.state == this.states.CHASE) {
+        var dx = this.targetPosition.x - this.x; // remplacer par target position 
+        var dy = this.targetPosition.y - this.y;
+
+        var angle = Math.atan2(dy, dx);
+
+        var speed = 100;
+        this.body.setVelocity(
+          Math.cos(angle) * speed,
+          Math.sin(angle) * speed
+        );
+      // }
+    // }
   }
 
   kill() {
     this.setActive(false)
     this.setVisible(false)
     this.body.stop()
+  }
+}
+
+class RangeEnemy extends Phaser.Physics.Arcade.Image { // Draft Range enemy 
+  constructor(scene, x, y) {
+    super(scene, x, y, "turret")
+    console.log(this.body);
+    this.body.velocity.y = Phaser.Math.Between(50, 100); // TODO: Problem this.body is null in console 
+    // this.targetPosition = null
+    
   }
 }
 
@@ -71,10 +112,49 @@ class WorldScene extends Phaser.Scene {
     })
   }
   createEnemies() {
-    this.enemies = this.physics.add.group({ classType: Enemy, runChildUpdate: true })
 
-    this.enemies.create(300, 300)
-    this.enemies.create(600, 300)
+    this.baseNumberOfEnemy = 50;
+    this.totalCountOfEnemy = this.baseNumberOfEnemy + this.waveNumber * 5;
+
+    this.enemies = this.physics.add.group({ classType: Enemy, runChildUpdate: true })
+    // this.enemies = this.add.group();
+    // this.enemies.create(300, 300)
+    // this.enemies.create(600, 300)
+    // this.enemies.create(100, 800);
+    // this.enemies.create(160, 800);
+    // this.enemies.create(100, 860);
+    // this.enemies.create(160, 860);
+
+
+    // this.enemies.create(1700, 800);
+    // this.enemies.create(1760, 800);
+    // this.enemies.create(1700, 860);
+    // this.enemies.create(1760, 860);
+    
+
+    // Creer vagues prédisposées = Création d'un WaveManager ? voir avec maxime 
+    // Avoir une variable pour accelerer vitesse enemis 
+    // faire boucler les vagues en changeant vitesse 
+    // En gros 2-3 vagues avec 2 types enemies (Range / Chaser) qui accelerent 
+
+
+    const radius = 500
+
+
+    // Wave exemple
+    for (let i = 0; i < this.totalCountOfEnemy; i++) {
+      const angle = Phaser.Math.DegToRad(Phaser.Math.Between(10, 170)+180)
+      let pos = new Phaser.Math.Vector2(0,0)
+      pos = pos.setToPolar(angle, radius + Phaser.Math.Between(0, 700))
+
+      this.enemies.create(pos.x + this.base.pos.x, pos.y + this.base.pos.y + this.base.height / 2);
+    }
+
+    this.enemies.children.each((enemy) => {
+      enemy.setTargetPosition(this.base.pos)
+    })   
+
+
   }
 
   create() {
@@ -82,6 +162,8 @@ class WorldScene extends Phaser.Scene {
     this.add.image(center.x, center.y, "bg").setScale(resolutionMultiplicator)
 
     this.base = new Base(this, center.x, center.y)
+  
+    this.waveNumber = 0
 
     this.createPlayers()
     this.createEnemies()
@@ -92,11 +174,27 @@ class WorldScene extends Phaser.Scene {
 
     this.addAxisControls()
     this.addEnemyBulletOverlapCheck()
+    this.addEnemyBaseOverlapCheck()
     this.createUI()
   }
 
   createUI() {
     this.shieldCDText = this.add.text(0, 0, "shield cd: 0", { font: "25px Courier", fill: "#00ff00" })
+  }
+
+  addEnemyBaseOverlapCheck() {
+    console.log(this.enemies, this.base)
+    // this.physics.add.overlap(this.base, this.enemies, (base, enemy) => {
+    //   console.log("overlap !!")
+    //   base.takeDamage(1)
+    //   enemy.kill()
+    // })
+
+
+
+
+
+    
   }
 
   addEnemyBulletOverlapCheck() {
@@ -216,11 +314,31 @@ class WorldScene extends Phaser.Scene {
     enemy.kill()
   }
 
+  enemyIsCollidingWithBase(enemy) {
+    if (!enemy.active) return false;
+    const {x, y} = enemy
+
+
+
+    const base = this.base
+    return x > base.pos.x - base.width / 2 && x < base.pos.x + base.width / 2 && y > base.pos.y - base.height / 2 && y < base.pos.y + base.height / 2
+  }
+
   update(time, delta) {
     this.handleInputs(time, delta)
 
-    // shield timer handling
 
+    // check for enemy hit
+    this.enemies.children.each((enemy) => {
+      if (this.enemyIsCollidingWithBase(enemy)) {
+        enemy.kill()
+        this.cameras.main.shake(10, 0.01)
+  
+        this.base.takeDamage(1)
+      }
+    })
+
+    // shield timer handling
     const reset = () => {
       this.shieldSyncRemainingTime = 0
       this.hasStartedSyncWindow = false

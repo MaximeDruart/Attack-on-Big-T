@@ -1,6 +1,6 @@
 import { resolutionMultiplicator, center } from "../constants"
 
-class Base extends Phaser.GameObjects.Image {
+class Base extends Phaser.Physics.Arcade.Image {
   constructor(scene, x, y) {
     super(scene, x, y, "base")
 
@@ -10,7 +10,7 @@ class Base extends Phaser.GameObjects.Image {
     this.height = this.width / 2
 
     this.pos = { x: center.x, y: 1440 * resolutionMultiplicator - this.height / 2 }
-    scene.add.image(center.x, 1440 * resolutionMultiplicator - this.height / 2, "base").setScale(this.baseScale)
+    scene.physics.add.image(center.x, 1440 * resolutionMultiplicator - this.height / 2, "base").setScale(this.baseScale)
 
     this.hp = 10
     this.isShieldActivated = false
@@ -25,6 +25,7 @@ class Base extends Phaser.GameObjects.Image {
   }
 
   takeDamage(damage) {
+    console.log("taking a hit")
     if (this.isShieldActivated) {
       return
     }
