@@ -7,6 +7,8 @@ class Laser extends Phaser.Physics.Arcade.Image {
     scene.physics.add.existing(this)
     this.setActive(false)
     this.setVisible(false)
+
+    this.damage = 10000
   }
 
   fire(origin, dir) {

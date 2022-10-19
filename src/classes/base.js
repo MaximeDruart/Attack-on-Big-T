@@ -18,14 +18,12 @@ class Base extends Phaser.Physics.Arcade.Image {
 
   setShield(duration) {
     this.isShieldActivated = true
-    console.log("shield on !")
     setTimeout(() => {
       this.isShieldActivated = false
     }, duration * 1000)
   }
 
   takeDamage(damage) {
-    console.log("taking a hit")
     if (this.isShieldActivated) {
       return
     }

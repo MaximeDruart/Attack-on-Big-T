@@ -9,6 +9,9 @@ import playerImg from "./assets/img/player.png"
 import turretImg from "./assets/img/turret.png"
 import bulletImg from "./assets/img/bullet.png"
 import laserImg from "./assets/img/laser.png"
+import bonusImg from "./assets/img/bonus.png"
+import ropeTileImg from "./assets/img/ropeTile.png"
+import ropeGrabImg from "./assets/img/ropeGrab.png"
 
 import laserIconImg from "./assets/ui/laserIcon.png"
 import shieldIconImg from "./assets/ui/shieldIcon.png"
@@ -21,11 +24,12 @@ import explosion_three from "./assets/audios/explosion_three.mp3"
 import { Player } from "./classes/player"
 import { Base } from "./classes/base"
 import { Enemy } from "./classes/enemy"
+import { Bonus } from "./classes/bonus"
+
 import GrayScalePipeline from "./pipelines/grayScale"
 
 import { gamepadEmulator, player1axis, player2axis } from "./axis"
-
-import { resolutionMultiplicator, center } from "./constants"
+import { resolutionMultiplicator, center, bonusesStats, bonusesStatsKey } from "./constants"
 import { enemyData } from "./enemyData"
 
 class BootScene extends Phaser.Scene {
@@ -40,8 +44,11 @@ class BootScene extends Phaser.Scene {
     this.load.image("turret", turretImg)
     this.load.image("bullet", bulletImg)
     this.load.image("laser", laserImg)
+    this.load.image("bonus", bonusImg)
     this.load.image("laserIcon", laserIconImg)
     this.load.image("shieldIcon", shieldIconImg)
+    this.load.image("ropeTile", ropeTileImg)
+    this.load.image("ropeGrab", ropeGrabImg)
 
     this.load.audio("laser_one", laser_one)
     this.load.audio("laser_two", laser_two)
@@ -141,14 +148,26 @@ class WorldScene extends Phaser.Scene {
     this.waveIsCompleted = false
     this.createWave()
 
+    this.initBonuses()
+    this.addHookBonusOverlapCheck()
+
     this.cursors = this.input.keyboard.createCursorKeys()
     this.keyE = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E)
     this.spaceBar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
 
     this.addAxisControls()
     this.addEnemyBulletOverlapCheck()
-
     this.createUI()
+  }
+
+  initBonuses() {
+    this.bonuses = this.physics.add.group({ classType: Bonus, runChildUpdate: true })
+    // 1 is 100%
+    this.bonusDropChance = 0.1
+  }
+
+  createBonus(x, y) {
+    this.bonuses.create(x, y, bonusesStatsKey[Math.floor(Math.random() * bonusesStatsKey.length)])
   }
 
   createUI() {
@@ -289,6 +308,23 @@ class WorldScene extends Phaser.Scene {
     )
   }
 
+  addHookBonusOverlapCheck() {
+    this.physics.add.overlap(
+      this.players.children.entries[0].hook,
+      this.bonuses,
+      this.handleHookBonusHit,
+      this.checkHookVsBonus,
+      this
+    )
+    this.physics.add.overlap(
+      this.players.children.entries[1].hook,
+      this.bonuses,
+      this.handleHookBonusHit,
+      this.checkHookVsBonus,
+      this
+    )
+  }
+
   addAxisControls() {
     this.joystickX = {
       1: 0,
@@ -304,6 +340,10 @@ class WorldScene extends Phaser.Scene {
       2: false,
     }
     this.isLasering = {
+      1: false,
+      2: false,
+    }
+    this.isShootingHook = {
       1: false,
       2: false,
     }
@@ -367,10 +407,13 @@ class WorldScene extends Phaser.Scene {
         this.laserRemainingCooldown = Math.max(this.laserRemainingCooldown, 0)
       }
     }
+    if (e.key == "i") this.isShootingHook[playerNumber] = true
   }
 
   keyUpHandler(e, playerNumber) {
     if (e.key === "a") this.isShooting[playerNumber] = false
+
+    if (e.key == "i") this.isShootingHook[playerNumber] = false
   }
 
   handleControls(player, time) {
@@ -384,6 +427,11 @@ class WorldScene extends Phaser.Scene {
 
     if (this.isShooting[player.playerNumber]) {
       player.shoot(time)
+    }
+    if (this.isShootingHook[player.playerNumber]) {
+      player.shootHook()
+    } else {
+      player.stopHook()
     }
 
     // keyboard controls
@@ -409,23 +457,35 @@ class WorldScene extends Phaser.Scene {
   checkLaserVsEnemy(laser, enemy) {
     return laser.active && enemy.active
   }
+  checkHookVsBonus(hook, bonus) {
+    return hook.active && bonus.active
+  }
 
   handleEnemyHit(bullet, enemy) {
     bullet.kill()
     enemy.registerHit()
     if (enemy.hp <= 0) {
-      enemy.kill()
-      this.totalKills++
-      this.waveKills++
+      this.onEnemyKill(enemy)
     }
   }
   handleEnemyLaserHit(laser, enemy) {
-    enemy.registerHit(100000)
+    enemy.registerHit(laser.damage)
     if (enemy.hp <= 0) {
-      enemy.kill()
-      this.totalKills++
-      this.waveKills++
+      this.onEnemyKill(enemy)
     }
+  }
+  handleHookBonusHit(hook, bonus) {
+    bonus.pickUpBonus()
+    bonus.kill()
+  }
+
+  onEnemyKill(enemy) {
+    this.totalKills++
+    this.waveKills++
+    if (Math.random() < this.bonusDropChance) {
+      this.createBonus(enemy.x, enemy.y)
+    }
+    enemy.kill()
   }
 
   objectIsCollidingWithBase(object) {

@@ -11,4 +11,11 @@ const ranges = {
   MELEE: "MELEE",
 }
 
-export { resolutionMultiplicator, center, ranges }
+// by much how the stats will be changed on bonus pickup
+const bonusesStats = {
+  fireDelay: -10,
+  fireSpeed: 20,
+}
+const bonusesStatsKey = Object.keys(bonusesStats)
+
+export { resolutionMultiplicator, center, ranges, bonusesStats, bonusesStatsKey }
