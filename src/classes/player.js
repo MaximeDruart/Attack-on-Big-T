@@ -1,5 +1,6 @@
 import { mapRange } from "../utils"
 import { Bullet } from "./bullet"
+import randomAudio from "../randomAudio.js"
 import { Laser } from "./laser"
 
 class Player extends Phaser.Physics.Arcade.Image {
@@ -82,6 +83,7 @@ class Player extends Phaser.Physics.Arcade.Image {
     if (time < this.lastFired) return
     const bullet = this.bullets.get()
     if (bullet) {
+      randomAudio(this.scene, ["laser_one", "laser_two"], 0.3)
       // up vector, rotate it by the angle of the cannon, the normalize it so speed can be applied and reverse to point outwards
       let bulletDirection = new Phaser.Math.Vector2(0, 1).rotate(this.cannonRotation).normalize().negate()
 
