@@ -28,10 +28,10 @@ class GameOverScene extends Phaser.Scene {
         // let titleText = this.add.text(100, 100, "BIG T INVADER")
         // titleText.setScale(scale).setScrollFactor(0)
 
-        restartButton.setInteractive(); 
-        restartButton.on('pointerup', () => {
-            this.scene.start('MenuScene')
-        })
+        // restartButton.setInteractive(); 
+        // restartButton.on('pointerup', () => {
+        //     this.scene.start('MenuScene')
+        // })
     }
 }
 

@@ -101,6 +101,11 @@ class WorldScene extends Phaser.Scene {
     super("WorldScene")
   }
 
+  setGameOver() {
+    console.log(this.scene.start);
+    this.scene.start('GameOverScene') 
+  }
+
   createPlayers() {
     this.players = this.physics.add.group({ classType: Player, runChildUpdate: true })
 
@@ -162,7 +167,7 @@ class WorldScene extends Phaser.Scene {
     // add background
     this.add.image(center.x, center.y, "bg").setScale(resolutionMultiplicator)
 
-    this.base = new Base(this, center.x, center.y)
+    this.base = new Base(this, center.x, center.y, this.setGameOver.bind(this))
   
     this.waveNumber = 0
 

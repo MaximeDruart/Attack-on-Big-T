@@ -35,7 +35,14 @@ class MenuScene extends Phaser.Scene {
         playButton.setInteractive(); 
         playButton.on('pointerup', () => {
             this.scene.start('WorldScene')
+            this.sound.stopAll('introTheme')
         })
+
+        // A ajouter quand passage sur borne
+        // this.cursors = this.input.keyboard.createCursorKeys()
+        // this.keyE = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E)
+        // this.spaceBar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
+    
     }
 }
 
