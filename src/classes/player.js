@@ -1,5 +1,6 @@
 import { mapRange } from "../utils"
 import { Bullet } from "./bullet"
+import { Laser } from "./laser"
 
 class Player extends Phaser.Physics.Arcade.Image {
   constructor(scene, x, y, playerNumber, linearPosition) {
@@ -16,13 +17,6 @@ class Player extends Phaser.Physics.Arcade.Image {
 
     this.bullets = scene.physics.add.group({ classType: Bullet, maxSize: 30, runChildUpdate: true })
 
-    // add 10 bullets
-    // for (let i = 0; i < 20; i++) {
-    //   const bullet = this.bullets.create(0, 0, "turret").setScale(2, 0.3)
-    //   bullet.setActive(false)
-    //   bullet.setVisible(false)
-    // }
-
     this.cannonRotation = 0
 
     this.lastFired = 0
@@ -31,13 +25,24 @@ class Player extends Phaser.Physics.Arcade.Image {
       fireDelay: 150,
       fireSpeed: 800,
     }
+
+    this.laser = new Laser(this.scene)
+
+    this.isShootingLaser = false
   }
 
   addedToScene() {
     // this.setPositionFromLinear()
   }
 
-  update(t, dt) {}
+  update(t, dt) {
+    if (this.isShootingLaser) {
+      this.laser.updateLaserPosition(
+        this,
+        new Phaser.Math.Vector2(0, 1).rotate(this.cannonRotation).normalize().negate()
+      )
+    }
+  }
 
   setPositionFromLinear() {
     const az = this.linearPosition * Math.PI - Math.PI
@@ -83,6 +88,17 @@ class Player extends Phaser.Physics.Arcade.Image {
       bullet.fire({ x: this.x, y: this.y }, bulletDirection, this.cannonStats.fireSpeed)
       this.lastFired = time + this.cannonStats.fireDelay
     }
+  }
+
+  shootLaser(duration) {
+    let bulletDirection = new Phaser.Math.Vector2(0, 1).rotate(this.cannonRotation).normalize().negate()
+    this.laser.fire({ x: this.x, y: this.y }, bulletDirection)
+    this.isShootingLaser = true
+    this.scene.cameras.main.shake(duration * 1000, 0.007)
+    setTimeout(() => {
+      this.isShootingLaser = false
+      this.laser.kill()
+    }, duration * 1000)
   }
 }
 
