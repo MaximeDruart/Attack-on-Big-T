@@ -54,7 +54,9 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
         this.setTint(Phaser.Display.Color.GetColor(value, value, 255))
       },
     })
+    // registering damage and not allowing values under 0
     this.hp -= hitDamage
+    this.hp = Math.max(this.hp, 0)
   }
 
   kill() {
