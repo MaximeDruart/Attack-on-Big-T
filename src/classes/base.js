@@ -32,6 +32,7 @@ class Base extends Phaser.Physics.Arcade.Image {
     this.hp -= damage
     if (this.hp <= 0) {
       // lose
+      this.scene.start('GameOverScene')
     }
   }
 

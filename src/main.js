@@ -13,6 +13,10 @@ import { gamepadEmulator, player1axis, player2axis } from "./axis"
 
 import { resolutionMultiplicator, center } from "./constants"
 
+import MenuScene  from "./scenes/menu"
+import GameOverScene  from "./scenes/gameOver"
+
+let menuScene = new MenuScene();
 class BootScene extends Phaser.Scene {
   constructor() {
     super("BootScene")
@@ -25,12 +29,9 @@ class BootScene extends Phaser.Scene {
     this.load.image("turret", turretImg)
   }
   create() {
-    this.scene.start("WorldScene")
+    this.scene.start("MenuScene")
   }
 
-  startWorldScene() {
-    this.scene.start("WorldScene")
-  }
 }
 
 class Enemy extends Phaser.Physics.Arcade.Image { // voir avec maxime si enemy = chaser ou si autre classe EnemyChaser qui extend Enemy
@@ -401,7 +402,9 @@ const config = {
       debug: true,
     },
   },
-  scene: [BootScene, WorldScene],
+  scene: [BootScene, MenuScene, GameOverScene, WorldScene],
 }
 
 const game = new Phaser.Game(config)
+// game.scene.add('MenuScene', menuScene);
+// game.scene.start('MenuScene')
