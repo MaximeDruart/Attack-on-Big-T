@@ -21,6 +21,7 @@ class Base extends Phaser.Physics.Arcade.Image {
   setShield(duration) {
     this.isShieldActivated = true
     console.log("shield on !")
+    // Déclencher sprite shield
     setTimeout(() => {
       this.isShieldActivated = false
     }, duration * 1000)
