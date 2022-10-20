@@ -25,6 +25,8 @@ class Player extends Phaser.Physics.Arcade.Image {
 
     this.cannonRotation = 0
 
+    this.invertedControls = false
+
     this.lastFired = 0
 
     this.cannonStats = {
