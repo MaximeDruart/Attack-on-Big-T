@@ -3,29 +3,30 @@ import Phaser from "phaser"
 import "./axis"
 
 import "./style.css"
-import baseImg from "./assets/img/base.png"
-import baseShieldImg from "./assets/img/shield.png"
-import bulletImg from "./assets/img/pellet.png"
+import baseImg from "/assets/img/base.png"
+import baseShieldImg from "/assets/img/shield.png"
+import bulletImg from "/assets/img/pellet.png"
 
-import chaserImg from "./assets/img/chaser.png"
-import e1000Img from "./assets/img/e1000.png"
-import ratImg from "./assets/img/rat.png"
+import chaserImg from "/assets/img/chaser.png"
+import e1000Img from "/assets/img/e1000.png"
+import ratImg from "/assets/img/rat.png"
 
-import bgImg from "./assets/img/bg.png"
-import playerImg from "./assets/img/player.png"
-import turretImg from "./assets/img/turret.png"
-import laserImg from "./assets/img/laser.png"
-import bonusImg from "./assets/img/bonus.png"
-import ropeTileImg from "./assets/img/ropeTile.png"
-import ropeGrabImg from "./assets/img/ropeGrab.png"
+import bgImg from "/assets/img/bg.png"
+import playerImg from "/assets/img/player.png"
+import turretImg from "/assets/img/turret.png"
+import laserImg from "/assets/img/laser.png"
+import bonusImg from "/assets/img/bonus.png"
+import ropeTileImg from "/assets/img/ropeTile.png"
+import ropeGrabImg from "/assets/img/ropeGrab.png"
 
-import laserIconImg from "./assets/ui/laserIcon.png"
-import shieldIconImg from "./assets/ui/shieldIcon.png"
+import laserIconImg from "/assets/ui/laserIcon.png"
+import shieldIconImg from "/assets/ui/shieldIcon.png"
+import buttonsImg from "/assets/ui/buttons.png"
 
-import laser_one from "./assets/audios/laser_one.mp3"
-import laser_two from "./assets/audios/laser_two.mp3"
-import explosion_two from "./assets/audios/explosion_two.mp3"
-import explosion_three from "./assets/audios/explosion_three.mp3"
+import laser_one from "/assets/audios/laser_one.mp3"
+import laser_two from "/assets/audios/laser_two.mp3"
+import explosion_two from "/assets/audios/explosion_two.mp3"
+import explosion_three from "/assets/audios/explosion_three.mp3"
 
 import { Player } from "./classes/player"
 import { Base } from "./classes/base"
@@ -61,6 +62,7 @@ class BootScene extends Phaser.Scene {
 
     this.load.spritesheet("e1000", e1000Img, { frameWidth: 32, frameHeight: 32 })
     this.load.spritesheet("base-shield", baseShieldImg, { frameWidth: 196, frameHeight: 98 })
+    this.load.spritesheet("buttons", buttonsImg, { frameWidth: 64, frameHeight: 64 })
 
     this.load.audio("laser_one", laser_one)
     this.load.audio("laser_two", laser_two)
