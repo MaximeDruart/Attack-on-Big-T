@@ -59,6 +59,7 @@ import GrayScalePipeline from "./pipelines/grayScale"
 import { gamepadEmulator, player1axis, player2axis } from "./axis"
 import { center, bonusesStatsKey } from "./constants"
 import { enemyData } from "./enemyData"
+import { mapRange } from "./utils"
 
 class BootScene extends Phaser.Scene {
   constructor() {
@@ -112,7 +113,6 @@ class BootScene extends Phaser.Scene {
     this.load.audio("note_3", note_3)
     this.load.audio("note_4", note_4)
   }
-
 
   createAnims() {
     this.anims.create({
@@ -202,31 +202,31 @@ class BootScene extends Phaser.Scene {
     })
 
     this.anims.create({
-      key: "boss-idle", 
-      frameRate: 1, 
-      frames: this.anims.generateFrameNumbers("bigT", { start: 0, end: 1}), 
-      repeat: -1
+      key: "boss-idle",
+      frameRate: 1,
+      frames: this.anims.generateFrameNumbers("bigT", { start: 0, end: 1 }),
+      repeat: -1,
     })
 
     this.anims.create({
-      key: "boss-laugh", 
-      frameRate: 1, 
-      frames: this.anims.generateFrameNumbers("bigT", { start: 2, end: 3}), 
+      key: "boss-laugh",
+      frameRate: 1,
+      frames: this.anims.generateFrameNumbers("bigT", { start: 2, end: 3 }),
       // repeat: -1
     })
 
     this.anims.create({
-      key: "boss-angry", 
-      frameRate: 1, 
-      frames: this.anims.generateFrameNumbers("bigT", { start: 4, end: 5}), 
-      repeat: -1
+      key: "boss-angry",
+      frameRate: 1,
+      frames: this.anims.generateFrameNumbers("bigT", { start: 4, end: 5 }),
+      repeat: -1,
     })
 
     this.anims.create({
-      key: "boss-strange", 
-      frameRate: 1, 
-      frames: this.anims.generateFrameNumbers("bigT", { start: 5, end: 6}), 
-      repeat: -1
+      key: "boss-strange",
+      frameRate: 1,
+      frames: this.anims.generateFrameNumbers("bigT", { start: 5, end: 6 }),
+      repeat: -1,
     })
   }
 
@@ -279,20 +279,39 @@ class WorldScene extends Phaser.Scene {
 
   increaseTearDelayMalus() {
     this.spawnText("slowTextImg")
-    let kills = 0
-    this.players.children.entries[0].cannonStats.fireDelay = 250
-    this.players.children.entries[0].cannonStats.fireDelay = 250
+    this.isRunningTearDelayMalus = true
+    this.tdMalusCurrentStat = this.players.children.entries[0].cannonStats.fireDelay
+    this.tdMalusNerfedStat = 250
 
-    window.addEventListener("kill", () => {
-      kills++
-      if (
-        this.players.children.entries[0].cannonStats.fireDelay !== 150 &&
-        this.players.children.entries[0].cannonStats.fireDelay !== 150
-      ) {
-        this.players.children.entries[0].cannonStats.fireDelay -= 10
-        this.players.children.entries[0].cannonStats.fireDelay -= 10
-      }
-    })
+    this.tdTargetKills = 8
+
+    this.players.children.entries[0].cannonStats.fireDelay = this.tdMalusNerfedStat
+    this.players.children.entries[1].cannonStats.fireDelay = this.tdMalusNerfedStat
+  }
+
+  updateTearDelayMalus() {
+    if (this.waveKills >= this.tdTargetKills) {
+      this.players.children.entries[0].cannonStats.fireDelay = this.tdMalusCurrentStat
+      this.players.children.entries[1].cannonStats.fireDelay = this.tdMalusCurrentStat
+      this.isRunningTearDelayMalus = false
+      return
+    }
+
+    this.players.children.entries[0].cannonStats.fireDelay = mapRange(
+      this.waveKills,
+      0,
+      this.tdTargetKills,
+      this.tdMalusNerfedStat,
+      this.tdMalusCurrentStat
+    )
+
+    this.players.children.entries[1].cannonStats.fireDelay = mapRange(
+      this.waveKills,
+      0,
+      this.tdTargetKills,
+      this.tdMalusNerfedStat,
+      this.tdMalusCurrentStat
+    )
   }
 
   qteMalus() {
@@ -415,9 +434,10 @@ class WorldScene extends Phaser.Scene {
       enemyTemp.setTargetPosition(this.base.pos)
     })
 
+    this.isRunningTearDelayMalus = false
+
     this.malusProbability = 0.3 + 0.03 * this.waveNumber
     const triggerMalus = Math.random() < this.malusProbability
-    
 
     if (triggerMalus && this.waveNumber !== 0) {
       const ranIndex = Math.floor(Math.random() * 3)
@@ -426,14 +446,11 @@ class WorldScene extends Phaser.Scene {
       if (ranIndex === 2) this.qteMalus()
     }
 
-        // big t 
-        setTimeout(() => {
-          this.bigT.play("boss-idle")
-        }, 3000);
-        
-        if (triggerMalus) {
-          this.bigT.play("boss-laugh")
-        }
+    // big t
+    if (triggerMalus) this.bigT.play("boss-laugh")
+    setTimeout(() => {
+      this.bigT.play("boss-idle")
+    }, 3000)
   }
 
   setWaveComplete() {
@@ -450,7 +467,7 @@ class WorldScene extends Phaser.Scene {
     this.add.image(0, 0, "bg").setOrigin(0, 0)
     this.bigT = this.add.sprite(center.x, center.y, "bigT")
     this.bigT.alpha = 0.8
-    this.bigT.play("boss-idle");
+    this.bigT.play("boss-idle")
     this.base = new Base(this, center.x, center.y)
 
     this.waveNumber = 0
@@ -815,6 +832,7 @@ class WorldScene extends Phaser.Scene {
   onEnemyKill(enemy) {
     this.totalKills++
     this.waveKills++
+    if (this.isRunningTearDelayMalus) this.updateTearDelayMalus()
     this.updateScore(enemy.stats.hp * 5)
     if (Math.random() < this.bonusDropChance) {
       this.createBonus(enemy.x, enemy.y)
