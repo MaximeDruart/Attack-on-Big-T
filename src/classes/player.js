@@ -25,10 +25,11 @@ class Player extends Phaser.Physics.Arcade.Image {
 
     this.lastFired = 0
 
-    this.cannonStats = {
+    this.cannonBaseStats = {
       fireDelay: 150,
       fireSpeed: 800,
     }
+    this.cannonStats = structuredClone(this.cannonBaseStats)
 
     this.laser = new Laser(this.scene)
     this.isShootingLaser = false

@@ -34,7 +34,7 @@ export const enemyData = [
     },
   },
   {
-    name: "chaser",
+    name: "rat",
     hp: 1,
     speed: 200,
     range: "MELEE",
@@ -43,8 +43,8 @@ export const enemyData = [
     damage: 1,
     wave: {
       startWave: 5,
-      startCount: 30,
-      waveGrowth: 15,
+      startCount: 20,
+      waveGrowth: 10,
     },
   },
   {

@@ -5,9 +5,11 @@ import "./axis"
 import "./style.css"
 import baseImg from "./assets/img/base.png"
 import baseShieldImg from "./assets/img/shield.png"
+import bulletImg from "./assets/img/pellet.png"
+
 import chaserImg from "./assets/img/chaser.png"
 import e1000Img from "./assets/img/e1000.png"
-import bulletImg from "./assets/img/pellet.png"
+import ratImg from "./assets/img/rat.png"
 
 import bgImg from "./assets/img/bg.png"
 import playerImg from "./assets/img/player.png"
@@ -47,6 +49,7 @@ class BootScene extends Phaser.Scene {
     this.load.image("player", playerImg)
     this.load.image("turret", turretImg)
     this.load.image("chaser", chaserImg)
+    this.load.image("rat", ratImg)
     this.load.image("bullet", bulletImg)
 
     this.load.image("laser", laserImg)
@@ -103,43 +106,50 @@ class WorldScene extends Phaser.Scene {
     return enemies
   }
 
-  handleMaluses(malusIndex) {
+  invertControlsMalus() {
+    console.log(this.players)
+    this.players.children.entries[0].invertedControls = true
+    this.players.children.entries[1].invertedControls = true
 
-    //invert controls for 10 seconds
-    const invertControls = () => {
-      this.players.children.entries[0].invertedControls = true
-      this.players.children.entries[1].invertedControls = true
-
-      setTimeout(() => {
-        this.players.children.entries[0].invertedControls = false
-        this.players.children.entries[1].invertedControls = false
-      }, 10000)
-    }
-    
-    const increaseTearRate = () => {
-      let kills = 0;
-      this.players.children.entries[0].cannonStats.fireDelay = 250
-      this.players.children.entries[0].cannonStats.fireDelay = 250
-
-      window.addEventListener('kill', () => {
-        kills++
-        if(this.players.children.entries[0].cannonStats.fireDelay !== 150 && this.players.children.entries[0].cannonStats.fireDelay !==  150) {
-          this.players.children.entries[0].cannonStats.fireDelay -=  10
-          this.players.children.entries[0].cannonStats.fireDelay -=  10
-        }
-      })
-    }
-
-    const maluses = [invertControls, increaseTearRate]
-
-    return maluses[malusIndex]()
+    setTimeout(() => {
+      this.players.children.entries[0].invertedControls = false
+      this.players.children.entries[1].invertedControls = false
+    }, 10000)
   }
+
+  increaseTearDelayMalus() {
+    let kills = 0
+    console.log(this.players)
+    this.players.children.entries[0].cannonStats.fireDelay = 250
+    this.players.children.entries[0].cannonStats.fireDelay = 250
+
+    window.addEventListener("kill", () => {
+      kills++
+      if (
+        this.players.children.entries[0].cannonStats.fireDelay !== 150 &&
+        this.players.children.entries[0].cannonStats.fireDelay !== 150
+      ) {
+        this.players.children.entries[0].cannonStats.fireDelay -= 10
+        this.players.children.entries[0].cannonStats.fireDelay -= 10
+      }
+    })
+  }
+
+  qteMalus() {}
 
   createWave() {
     this.waveKills = 0
     this.waveIsCompleted = false
 
-    this.handleMaluses(1)
+    this.malusProbability = 0.3 + 0.03 * this.waveNumber
+    const triggerMalus = Math.random() < 0.5
+
+    if (triggerMalus) {
+      const ranIndex = Math.floor(Math.random() * 3)
+      if (ranIndex === 0) this.invertControlsMalus()
+      if (ranIndex === 1) this.increaseTearDelayMalus()
+      if (ranIndex === 2) this.qteMalus()
+    }
 
     const enemies = this.getEnemiesForWave(this.waveNumber)
 
@@ -195,8 +205,6 @@ class WorldScene extends Phaser.Scene {
     this.add.image(0, 0, "bg").setOrigin(0, 0)
 
     this.base = new Base(this, center.x, center.y)
-
-    // this.game.renderer.addPipeline("Grayscale", new GrayscalePipeline(this.game))
 
     this.waveNumber = 0
     this.waveKills = 0
