@@ -26,6 +26,7 @@ import buttonsImg from "/assets/ui/buttons.png"
 import cadenceBonusImg from "/assets/img/CadenceSheet.png"
 import cdBonusImg from "/assets/img/CDSheet.png"
 import speedBonusImg from "/assets/img/SpeedSheet.png"
+import bulletSizeBonusImg from "/assets/img/LargeSheet.png"
 
 import slowTextImg from "/assets/img/SlowSheet.png"
 import reverseTextImg from "/assets/img/ReverseSheet.png"
@@ -41,6 +42,7 @@ import explosion_three from "/assets/audios/explosion_three.mp3"
 import big_laser from "/assets/audios/big_laser.mp3"
 import fireSpeed from "/assets/audios/fireSpeed.mp3"
 import fireDelay from "/assets/audios/fireDelay.mp3"
+import bulletScale from "/assets/audios/bulletScale.mp3"
 
 import note_1 from "/assets/audios/qte_notes/note_1.mp3"
 import note_2 from "/assets/audios/qte_notes/note_2.mp3"
@@ -81,6 +83,7 @@ class BootScene extends Phaser.Scene {
     this.load.spritesheet("fireDelaySprite", cadenceBonusImg, { frameWidth: 36, frameHeight: 32 })
     this.load.spritesheet("CDBonusSprite", cdBonusImg, { frameWidth: 36, frameHeight: 32 })
     this.load.spritesheet("fireSpeedSprite", speedBonusImg, { frameWidth: 36, frameHeight: 32 })
+    this.load.spritesheet("bulletScaleSprite", bulletSizeBonusImg, { frameWidth: 36, frameHeight: 32 })
 
     this.load.spritesheet("slowTextImg", slowTextImg, { frameWidth: 2560 / 4, frameHeight: 1440 / 4 })
     this.load.spritesheet("reverseTextImg", reverseTextImg, { frameWidth: 2560 / 4, frameHeight: 1440 / 4 })
@@ -101,6 +104,7 @@ class BootScene extends Phaser.Scene {
     this.load.audio("big_laser", big_laser)
     this.load.audio("fireDelay", fireDelay)
     this.load.audio("fireSpeed", fireSpeed)
+    this.load.audio("bulletScale", bulletScale)
 
     this.load.audio("note_1", note_1)
     this.load.audio("note_2", note_2)
@@ -161,6 +165,14 @@ class BootScene extends Phaser.Scene {
       key: "fireSpeedSpriteAnim",
       frameRate: 4,
       frames: this.anims.generateFrameNumbers("fireSpeedSprite", { start: 0, end: 3 }),
+      repeat: -1,
+      yoyo: true,
+      showOnStart: true,
+    })
+    this.anims.create({
+      key: "bulletScaleSpriteAnim",
+      frameRate: 4,
+      frames: this.anims.generateFrameNumbers("bulletScaleSprite", { start: 0, end: 3 }),
       repeat: -1,
       yoyo: true,
       showOnStart: true,
