@@ -9,7 +9,7 @@ class Player extends Phaser.Physics.Arcade.Image {
     super(scene, x, y, "turret")
 
     this.playerNumber = playerNumber
-    this.speed = 0.005
+    this.speed = 0.015
 
     scene.add.existing(this)
     scene.physics.add.existing(this)

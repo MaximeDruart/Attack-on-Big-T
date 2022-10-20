@@ -4,7 +4,9 @@ import "./axis"
 
 import "./style.css"
 import baseImg from "./assets/img/base.png"
+import baseShieldImg from "./assets/img/shield.png"
 import chaserImg from "./assets/img/chaser.png"
+import e1000Img from "./assets/img/e1000.png"
 import bulletImg from "./assets/img/pellet.png"
 
 import bgImg from "./assets/img/bg.png"
@@ -53,6 +55,9 @@ class BootScene extends Phaser.Scene {
     this.load.image("shieldIcon", shieldIconImg)
     this.load.image("ropeTile", ropeTileImg)
     this.load.image("ropeGrab", ropeGrabImg)
+
+    this.load.spritesheet("e1000", e1000Img, { frameWidth: 32, frameHeight: 32 })
+    this.load.spritesheet("base-shield", baseShieldImg, { frameWidth: 196, frameHeight: 98 })
 
     this.load.audio("laser_one", laser_one)
     this.load.audio("laser_two", laser_two)
@@ -106,8 +111,8 @@ class WorldScene extends Phaser.Scene {
 
     this.waveEnemyCount = enemies.length
 
-    const radius = 1100
-    const distanceRandomness = 400
+    const radius = 400
+    const distanceRandomness = 140
 
     enemies.forEach((enemy) => {
       const angle = Phaser.Math.DegToRad(Phaser.Math.Between(10, 170) + 180)
@@ -134,9 +139,24 @@ class WorldScene extends Phaser.Scene {
     const t = this.time.delayedCall(3000, this.createWave, [], this)
   }
 
+  createAnims() {
+    this.anims.create({
+      key: "e1000-fly",
+      frameRate: 4,
+      frames: this.anims.generateFrameNumbers("e1000", { start: 0, end: 3 }),
+      repeat: -1,
+    })
+    this.anims.create({
+      key: "base-shield-anim",
+      frameRate: 10,
+      frames: this.anims.generateFrameNumbers("base-shield", { start: 0, end: 6 }),
+      repeat: 1,
+    })
+  }
+
   create() {
-    // add background
-    this.add.image(center.x, center.y, "bg").setScale(4)
+    this.createAnims()
+    this.add.image(0, 0, "bg").setOrigin(0, 0)
 
     this.base = new Base(this, center.x, center.y)
 
@@ -359,7 +379,7 @@ class WorldScene extends Phaser.Scene {
     // time available for user to press shield button simultaneously
     this.shieldSyncWindow = 1
     // shield duration
-    this.shieldDuration = 2
+    this.shieldDuration = 1
 
     this.hasStartedShieldSyncWindow = false
     this.shieldSyncRemainingTime = this.shieldSyncWindow
@@ -628,14 +648,17 @@ class WorldScene extends Phaser.Scene {
 const config = {
   type: Phaser.AUTO,
   parent: "content",
-  width: 640 ,
+  width: 640,
   height: 360,
-  zoom: 2560 / 640,
-  // zoom: 2,
+  zoom: 4,
+  fps: {
+    target: 60,
+  },
   pixelArt: true,
   physics: {
     default: "arcade",
     arcade: {
+      fps: 60,
       gravity: { y: 0 },
       debug: false,
     },

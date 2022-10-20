@@ -7,10 +7,13 @@ import randomAudio from "../randomAudio.js"
 class Enemy extends Phaser.Physics.Arcade.Sprite {
   // voir avec maxime si enemy = chaser ou si autre classe EnemyChaser qui extend Enemy
   constructor(scene, x, y, name) {
-    super(scene, x, y, "turret")
-    this.targetPosition = null
+    super(scene, x, y, name)
 
     this.stats = enemyData.find((enemy) => enemy.name === name)
+    if (this.stats.range === RANGED) this.play("e1000-fly")
+
+    this.targetPosition = null
+
     this.hp = this.stats.hp
 
     if (this.stats.range === RANGED) {
@@ -24,6 +27,8 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
 
   setTargetPosition(base) {
     this.targetPosition = { x: base.x, y: base.y }
+    const direction = new Phaser.Math.Vector2().setFromObject(this.targetPosition).subtract(this)
+    if (direction.x > 0) this.flipX = true
   }
 
   update(time, delta) {
