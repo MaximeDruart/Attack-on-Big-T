@@ -10,11 +10,29 @@ import bulletImg from "./assets/img/pellet.png"
 import bgImg from "./assets/img/bg.png"
 import playerImg from "./assets/img/player.png"
 import turretImg from "./assets/img/turret.png"
+import laserImg from "./assets/img/laser.png"
+import bonusImg from "./assets/img/bonus.png"
+import ropeTileImg from "./assets/img/ropeTile.png"
+import ropeGrabImg from "./assets/img/ropeGrab.png"
+
+import laserIconImg from "./assets/ui/laserIcon.png"
+import shieldIconImg from "./assets/ui/shieldIcon.png"
+
+import laser_one from "./assets/audios/laser_one.mp3"
+import laser_two from "./assets/audios/laser_two.mp3"
+import explosion_two from "./assets/audios/explosion_two.mp3"
+import explosion_three from "./assets/audios/explosion_three.mp3"
+
 import { Player } from "./classes/player"
 import { Base } from "./classes/base"
-import { gamepadEmulator, player1axis, player2axis } from "./axis"
+import { Enemy } from "./classes/enemy"
+import { Bonus } from "./classes/bonus"
 
-import { resolutionMultiplicator, center } from "./constants"
+import GrayScalePipeline from "./pipelines/grayScale"
+
+import { gamepadEmulator, player1axis, player2axis } from "./axis"
+import { resolutionMultiplicator, center, bonusesStats, bonusesStatsKey } from "./constants"
+import { enemyData } from "./enemyData"
 
 class BootScene extends Phaser.Scene {
   constructor() {
@@ -29,6 +47,17 @@ class BootScene extends Phaser.Scene {
     this.load.image("chaser", chaserImg)
     this.load.image("bullet", bulletImg)
 
+    this.load.image("laser", laserImg)
+    this.load.image("bonus", bonusImg)
+    this.load.image("laserIcon", laserIconImg)
+    this.load.image("shieldIcon", shieldIconImg)
+    this.load.image("ropeTile", ropeTileImg)
+    this.load.image("ropeGrab", ropeGrabImg)
+
+    this.load.audio("laser_one", laser_one)
+    this.load.audio("laser_two", laser_two)
+    this.load.audio("explosion_two", explosion_two)
+    this.load.audio("explosion_three", explosion_three)
   }
   create() {
     this.scene.start("WorldScene")
@@ -36,68 +65,6 @@ class BootScene extends Phaser.Scene {
 
   startWorldScene() {
     this.scene.start("WorldScene")
-  }
-}
-
-class Enemy extends Phaser.Physics.Arcade.Image { // voir avec maxime si enemy = chaser ou si autre classe EnemyChaser qui extend Enemy
-  constructor(scene, x, y) {
-    super(scene, x, y, "chaser")
-    this.targetPosition = null
-  }
-
-  setTargetPosition(base) {
-    this.targetPosition = { x: base.x, y: base.y }
-  }
-
-  update() {
-    // go to base center continuously
-    // bump into base
-    // if colliding with base, deal damage
-    //    this.cameras.main.shake(50, 0.01)
-
-    // With this code, chaser enemies will move down the screen. 
-    // However, as soon as it is within 320 pixels (arbitrary, edit TARGET_CHASING_DISTANCE with wished distancer) to the player, it will start chasing the player
-
-    // if (!this.getData("isDead") && this.scene.player) {
-      // if (Phaser.Math.Distance.Between(
-      //   this.x,
-      //   this.y,
-      //   this.scene.player.x, // remplacer par target position 
-      //   this.scene.player.y // 
-      // ) < this.TARGET_CHASING_DISTANCE) {
-
-      // }
-      // this.state = this.states.CHASE;
-
-      // if (this.state == this.states.CHASE) {
-        var dx = this.targetPosition.x - this.x; // remplacer par target position 
-        var dy = this.targetPosition.y - this.y;
-
-        var angle = Math.atan2(dy, dx);
-
-        var speed = 100;
-        this.body.setVelocity(
-          Math.cos(angle) * speed,
-          Math.sin(angle) * speed
-        );
-      // }
-    // }
-  }
-
-  kill() {
-    this.setActive(false)
-    this.setVisible(false)
-    this.body.stop()
-  }
-}
-
-class RangeEnemy extends Phaser.Physics.Arcade.Image { // Draft Range enemy 
-  constructor(scene, x, y) {
-    super(scene, x, y, "turret")
-    console.log(this.body);
-    this.body.velocity.y = Phaser.Math.Between(50, 100); // TODO: Problem this.body is null in console 
-    // this.targetPosition = null
-    
   }
 }
 
@@ -117,50 +84,54 @@ class WorldScene extends Phaser.Scene {
       player.setPositionFromLinear()
     })
   }
-  createEnemies() {
 
-    this.baseNumberOfEnemy = 50;
-    this.totalCountOfEnemy = this.baseNumberOfEnemy + this.waveNumber * 5;
+  getEnemiesForWave(currentWave) {
+    let enemies = []
+    enemyData.map((enemy) => {
+      const { startWave, startCount, waveGrowth } = enemy.wave
+      if (startWave > currentWave) return
+      enemies = [
+        ...enemies,
+        ...new Array(startCount + Math.floor(waveGrowth * (currentWave - startWave))).fill(enemy.name),
+      ]
+    })
+    return enemies
+  }
 
-    this.enemies = this.physics.add.group({ classType: Enemy, runChildUpdate: true })
-    // this.enemies = this.add.group();
-    // this.enemies.create(300, 300)
-    // this.enemies.create(600, 300)
-    // this.enemies.create(100, 800);
-    // this.enemies.create(160, 800);
-    // this.enemies.create(100, 860);
-    // this.enemies.create(160, 860);
+  createWave() {
+    this.waveKills = 0
+    this.waveIsCompleted = false
 
+    const enemies = this.getEnemiesForWave(this.waveNumber)
 
-    // this.enemies.create(1700, 800);
-    // this.enemies.create(1760, 800);
-    // this.enemies.create(1700, 860);
-    // this.enemies.create(1760, 860);
-    
+    this.waveEnemyCount = enemies.length
 
-    // Creer vagues prédisposées = Création d'un WaveManager ? voir avec maxime 
-    // Avoir une variable pour accelerer vitesse enemis 
-    // faire boucler les vagues en changeant vitesse 
-    // En gros 2-3 vagues avec 2 types enemies (Range / Chaser) qui accelerent 
+    const radius = 1100
+    const distanceRandomness = 400
 
+    enemies.forEach((enemy) => {
+      const angle = Phaser.Math.DegToRad(Phaser.Math.Between(10, 170) + 180)
+      let pos = new Phaser.Math.Vector2(0, 0)
+      pos = pos.setToPolar(angle, radius + Phaser.Math.Between(0, distanceRandomness))
+      pos = {
+        x: pos.x + this.base.pos.x,
+        y: pos.y + this.base.pos.y + this.base.height / 2,
+      }
 
-    const radius = 500
-
-
-    // Wave exemple
-    for (let i = 0; i < this.totalCountOfEnemy; i++) {
-      const angle = Phaser.Math.DegToRad(Phaser.Math.Between(10, 170)+180)
-      let pos = new Phaser.Math.Vector2(0,0)
-      pos = pos.setToPolar(angle, radius + Phaser.Math.Between(0, 700))
-
-      this.enemies.create(pos.x + this.base.pos.x, pos.y + this.base.pos.y + this.base.height / 2);
-    }
+      this.enemies.create(pos.x, pos.y, enemy)
+    })
 
     this.enemies.children.each((enemy) => {
       enemy.setTargetPosition(this.base.pos)
-    })   
+    })
+  }
 
+  setWaveComplete() {
+    this.waveNumber++
+    this.enemies.clear(true, true)
+    this.waveIsCompleted = true
 
+    const t = this.time.delayedCall(3000, this.createWave, [], this)
   }
 
   create() {
@@ -168,11 +139,21 @@ class WorldScene extends Phaser.Scene {
     this.add.image(center.x, center.y, "bg").setScale(4)
 
     this.base = new Base(this, center.x, center.y)
-  
+
+    // this.game.renderer.addPipeline("Grayscale", new GrayscalePipeline(this.game))
+
     this.waveNumber = 0
+    this.waveKills = 0
+    this.totalKills = 0
 
     this.createPlayers()
-    this.createEnemies()
+
+    this.enemies = this.physics.add.group({ classType: Enemy, runChildUpdate: true })
+    this.waveIsCompleted = false
+    this.createWave()
+
+    this.initBonuses()
+    this.addHookBonusOverlapCheck()
 
     this.cursors = this.input.keyboard.createCursorKeys()
     this.keyE = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E)
@@ -180,42 +161,170 @@ class WorldScene extends Phaser.Scene {
 
     this.addAxisControls()
     this.addEnemyBulletOverlapCheck()
-    this.addEnemyBaseOverlapCheck()
     this.createUI()
+  }
+
+  initBonuses() {
+    this.bonuses = this.physics.add.group({ classType: Bonus, runChildUpdate: true })
+    // 1 is 100%
+    this.bonusDropChance = 0.1
+  }
+
+  createBonus(x, y) {
+    this.bonuses.create(x, y, bonusesStatsKey[Math.floor(Math.random() * bonusesStatsKey.length)])
   }
 
   createUI() {
     this.shieldCDText = this.add.text(0, 0, "shield cd: 0", { font: "25px Courier", fill: "#00ff00" })
+    this.laserCDText = this.add.text(0, 30, "laser cd: 0", { font: "25px Courier", fill: "#00ff00" })
+
+    const color = 0x000000 // mult
+    const alpha = 0.2
+
+    this.grayscalePipelineShield = this.renderer.pipelines.get("Gray1")
+    this.grayscalePipelineShield.gray = 0
+
+    this.shieldIcon = this.add.sprite(150, 900, "shieldIcon").setPipeline(this.grayscalePipelineShield)
+    this.shieldIconGraphics = this.add.graphics({ x: this.shieldIcon.x, y: this.shieldIcon.y })
+
+    this.shieldIconGraphics.fillStyle(color, alpha)
+    this.shieldIconGraphics.fillRect(
+      -this.shieldIcon.width / 2,
+      -this.shieldIcon.height / 2,
+      this.shieldIcon.width,
+      this.shieldIcon.height * 0
+    )
+
+    this.shieldIconGraphics.setBlendMode(Phaser.BlendModes.DIFFERENCE)
+
+    this.grayscalePipelineLaser = this.renderer.pipelines.get("Gray2")
+    this.grayscalePipelineLaser.gray = 0
+
+    this.laserIcon = this.add.sprite(400, 900, "laserIcon").setPipeline(this.grayscalePipelineLaser)
+    this.laserIconGraphics = this.add.graphics({ x: this.laserIcon.x, y: this.laserIcon.y })
+
+    this.laserIconGraphics.fillStyle(color, alpha)
+    this.laserIconGraphics.fillRect(
+      -this.laserIcon.width / 2,
+      -this.laserIcon.height / 2,
+      this.laserIcon.width,
+      this.laserIcon.height * 0
+    )
+
+    this.laserIconGraphics.setBlendMode(Phaser.BlendModes.DIFFERENCE)
   }
 
-  addEnemyBaseOverlapCheck() {
-    console.log(this.enemies, this.base)
-    // this.physics.add.overlap(this.base, this.enemies, (base, enemy) => {
-    //   console.log("overlap !!")
-    //   base.takeDamage(1)
-    //   enemy.kill()
-    // })
+  updateUI() {
+    // shield icon UI update
+    if (this.shieldRemainingCooldown > 0) {
+      if (this.grayscalePipelineShield.gray === 0) {
+        this.grayscalePipelineShield.gray = 0.01
+        this.tweens.add({
+          targets: this.grayscalePipelineShield,
+          duration: 200,
+          gray: 1,
+        })
+      }
 
+      const percentage = this.shieldRemainingCooldown / this.shieldCooldown
+      this.shieldIconGraphics.clear()
+      this.shieldIconGraphics.fillRect(
+        -this.shieldIcon.width / 2,
+        -this.shieldIcon.height / 2,
+        this.shieldIcon.width,
+        this.shieldIcon.height * percentage
+      )
+    }
+    if (this.shieldRemainingCooldown === 0 && this.grayscalePipelineShield.gray !== 0) {
+      this.tweens.add({
+        targets: this.grayscalePipelineShield,
+        duration: 250,
+        gray: 0,
+      })
+      this.shieldIconGraphics.clear()
+      this.shieldIconGraphics.fillRect(
+        -this.shieldIcon.width / 2,
+        -this.shieldIcon.height / 2,
+        this.shieldIcon.width,
+        0
+      )
+    }
 
+    // laser icon UI update
+    if (this.laserRemainingCooldown > 0) {
+      if (this.grayscalePipelineLaser.gray === 0) {
+        this.grayscalePipelineLaser.gray = 0.01
+        this.tweens.add({
+          targets: this.grayscalePipelineLaser,
+          duration: 200,
+          gray: 1,
+        })
+      }
 
-
-
-    
+      const percentage = this.laserRemainingCooldown / this.laserCooldown
+      this.laserIconGraphics.clear()
+      this.laserIconGraphics.fillRect(
+        -this.laserIcon.width / 2,
+        -this.laserIcon.height / 2,
+        this.laserIcon.width,
+        this.laserIcon.height * percentage
+      )
+    }
+    if (this.laserRemainingCooldown === 0 && this.grayscalePipelineLaser.gray !== 0) {
+      this.tweens.add({
+        targets: this.grayscalePipelineLaser,
+        duration: 250,
+        gray: 0,
+      })
+      this.laserIconGraphics.clear()
+      this.laserIconGraphics.fillRect(-this.laserIcon.width / 2, -this.laserIcon.height / 2, this.laserIcon.width, 0)
+    }
   }
 
   addEnemyBulletOverlapCheck() {
     this.physics.add.overlap(
       this.players.children.entries[0].bullets,
       this.enemies,
-      this.handleEnemyKills,
+      this.handleEnemyHit,
       this.checkBulletVsEnemy,
       this
     )
     this.physics.add.overlap(
       this.players.children.entries[1].bullets,
       this.enemies,
-      this.handleEnemyKills,
+      this.handleEnemyHit,
       this.checkBulletVsEnemy,
+      this
+    )
+    this.physics.add.overlap(
+      this.players.children.entries[0].laser,
+      this.enemies,
+      this.handleEnemyLaserHit,
+      this.checkLaserVsEnemy,
+      this
+    )
+    this.physics.add.overlap(
+      this.players.children.entries[1].laser,
+      this.enemies,
+      this.handleEnemyLaserHit,
+      this.checkLaserVsEnemy,
+      this
+    )
+  }
+
+  addHookBonusOverlapCheck() {
+    this.physics.add.overlap(
+      this.players.children.entries[0].hook,
+      this.bonuses,
+      this.handleHookBonusHit,
+      this.checkHookVsBonus,
+      this
+    )
+    this.physics.add.overlap(
+      this.players.children.entries[1].hook,
+      this.bonuses,
+      this.handleHookBonusHit,
+      this.checkHookVsBonus,
       this
     )
   }
@@ -234,6 +343,14 @@ class WorldScene extends Phaser.Scene {
       1: false,
       2: false,
     }
+    this.isLasering = {
+      1: false,
+      2: false,
+    }
+    this.isShootingHook = {
+      1: false,
+      2: false,
+    }
 
     // value in seconds
 
@@ -244,9 +361,20 @@ class WorldScene extends Phaser.Scene {
     // shield duration
     this.shieldDuration = 2
 
-    this.hasStartedSyncWindow = false
+    this.hasStartedShieldSyncWindow = false
     this.shieldSyncRemainingTime = this.shieldSyncWindow
     this.shieldRemainingCooldown = 0
+
+    // min time between laser
+    this.laserCooldown = 5
+    // time available for user to press laser button simultaneously
+    this.laserSyncWindow = 1
+    // laser duration
+    this.laserDuration = 2
+
+    this.hasStartedLaserSyncWindow = false
+    this.laserSyncRemainingTime = this.laserSyncWindow
+    this.laserRemainingCooldown = 0
 
     player1axis.addEventListener("joystick:move", this.player1JoystickMoveHandler.bind(this))
     player2axis.addEventListener("joystick:move", this.player2JoystickMoveHandler.bind(this))
@@ -272,13 +400,24 @@ class WorldScene extends Phaser.Scene {
     if (e.key === "x") {
       if (this.shieldRemainingCooldown === 0) {
         this.isShielding[playerNumber] = true
-        console.log("set shielding true")
       }
     }
+    if (e.key === "w") {
+      if (this.laserRemainingCooldown === 0) {
+        this.isLasering[playerNumber] = true
+      }
+      if (this.laserRemainingCooldown > 0) {
+        this.laserRemainingCooldown -= 0.04
+        this.laserRemainingCooldown = Math.max(this.laserRemainingCooldown, 0)
+      }
+    }
+    if (e.key == "i") this.isShootingHook[playerNumber] = true
   }
 
   keyUpHandler(e, playerNumber) {
     if (e.key === "a") this.isShooting[playerNumber] = false
+
+    if (e.key == "i") this.isShootingHook[playerNumber] = false
   }
 
   handleControls(player, time) {
@@ -292,6 +431,11 @@ class WorldScene extends Phaser.Scene {
 
     if (this.isShooting[player.playerNumber]) {
       player.shoot(time)
+    }
+    if (this.isShootingHook[player.playerNumber]) {
+      player.shootHook()
+    } else {
+      player.stopHook()
     }
 
     // keyboard controls
@@ -314,40 +458,54 @@ class WorldScene extends Phaser.Scene {
   checkBulletVsEnemy(bullet, enemy) {
     return bullet.active && enemy.active
   }
+  checkLaserVsEnemy(laser, enemy) {
+    return laser.active && enemy.active
+  }
+  checkHookVsBonus(hook, bonus) {
+    return hook.active && bonus.active
+  }
 
-  handleEnemyKills(bullet, enemy) {
+  handleEnemyHit(bullet, enemy) {
     bullet.kill()
+    enemy.registerHit()
+    if (enemy.hp <= 0) {
+      this.onEnemyKill(enemy)
+    }
+  }
+  handleEnemyLaserHit(laser, enemy) {
+    enemy.registerHit(laser.damage)
+    if (enemy.hp <= 0) {
+      this.onEnemyKill(enemy)
+    }
+  }
+  handleHookBonusHit(hook, bonus) {
+    bonus.pickUpBonus()
+    bonus.kill()
+  }
+
+  onEnemyKill(enemy) {
+    this.totalKills++
+    this.waveKills++
+    if (Math.random() < this.bonusDropChance) {
+      this.createBonus(enemy.x, enemy.y)
+    }
     enemy.kill()
   }
 
-  enemyIsCollidingWithBase(enemy) {
-    if (!enemy.active) return false;
-    const {x, y} = enemy
+  objectIsCollidingWithBase(object) {
+    if (!object.active) return false
+    const { x, y } = object
 
+    const distance = Phaser.Math.Distance.Between(x, y, this.base.pos.x, this.base.pos.y + this.base.height / 2)
 
-
-    const base = this.base
-    return x > base.pos.x - base.width / 2 && x < base.pos.x + base.width / 2 && y > base.pos.y - base.height / 2 && y < base.pos.y + base.height / 2
+    return distance < this.base.height
   }
 
-  update(time, delta) {
-    this.handleInputs(time, delta)
-
-
-    // check for enemy hit
-    this.enemies.children.each((enemy) => {
-      if (this.enemyIsCollidingWithBase(enemy)) {
-        enemy.kill()
-        this.cameras.main.shake(10, 0.01)
-  
-        this.base.takeDamage(1)
-      }
-    })
-
+  handleShield(time, delta) {
     // shield timer handling
     const reset = () => {
       this.shieldSyncRemainingTime = 0
-      this.hasStartedSyncWindow = false
+      this.hasStartedShieldSyncWindow = false
       this.isShielding = {
         1: false,
         2: false,
@@ -364,17 +522,15 @@ class WorldScene extends Phaser.Scene {
 
     if (!this.base.isShieldActivated || this.shieldRemainingCooldown > 0) {
       // sync window trigger
-      if (!!(this.isShielding["1"] ^ this.isShielding["2"]) && !this.hasStartedSyncWindow) {
-        console.log("start !")
+      if (!!(this.isShielding["1"] ^ this.isShielding["2"]) && !this.hasStartedShieldSyncWindow) {
         this.shieldSyncRemainingTime = 1
-        this.hasStartedSyncWindow = true
+        this.hasStartedShieldSyncWindow = true
       }
 
-      if (this.hasStartedSyncWindow) {
+      if (this.hasStartedShieldSyncWindow) {
         // sync window countdown
         if (this.shieldSyncRemainingTime > 0) {
           this.shieldSyncRemainingTime -= delta / (this.shieldSyncWindow * 1000)
-          // console.log(this.shieldSyncRemainingTime)
           this.shieldSyncRemainingTime = Math.max(this.shieldSyncRemainingTime, 0)
         }
 
@@ -391,6 +547,82 @@ class WorldScene extends Phaser.Scene {
       }
     }
   }
+
+  handleLaser(time, delta) {
+    // laser timer handling
+    const resetLaser = () => {
+      this.laserSyncRemainingTime = 0
+      this.hasStartedLaserSyncWindow = false
+      this.isLasering = {
+        1: false,
+        2: false,
+      }
+      this.laserRemainingCooldown = this.laserCooldown
+    }
+
+    if (this.laserRemainingCooldown > 0) {
+      this.laserRemainingCooldown -= delta / (this.laserCooldown * 1000)
+
+      this.laserCDText.setText(`laser cd: ${this.laserRemainingCooldown.toFixed(2)}`)
+      this.laserRemainingCooldown = Math.max(this.laserRemainingCooldown, 0)
+    }
+
+    if (!this.base.isLaserActivated || this.laserRemainingCooldown > 0) {
+      // sync window trigger
+      if (!!(this.isLasering["1"] ^ this.isLasering["2"]) && !this.hasStartedLaserSyncWindow) {
+        this.laserSyncRemainingTime = 1
+        this.hasStartedLaserSyncWindow = true
+      }
+
+      if (this.hasStartedLaserSyncWindow) {
+        // sync window countdown
+        if (this.laserSyncRemainingTime > 0) {
+          this.laserSyncRemainingTime -= delta / (this.laserSyncWindow * 1000)
+          this.laserSyncRemainingTime = Math.max(this.laserSyncRemainingTime, 0)
+        }
+
+        // failed sync
+        if (this.laserSyncRemainingTime <= 0) {
+          resetLaser()
+        }
+
+        // successful sync
+        if (this.isLasering["1"] && this.isLasering["2"]) {
+          // on successful
+          this.players.children.iterate((player) => player.shootLaser(this.laserDuration))
+          resetLaser()
+        }
+      }
+    }
+  }
+
+  update(time, delta) {
+    this.handleInputs(time, delta)
+
+    // check for enemy hit
+    this.enemies.children.each((enemy) => {
+      if (this.objectIsCollidingWithBase(enemy)) {
+        this.base.takeDamage(enemy.stats.damage)
+        enemy.kill()
+      }
+      if (!!enemy.bullets) {
+        enemy.bullets.children.each((bullet) => {
+          if (this.objectIsCollidingWithBase(bullet)) {
+            this.base.takeDamage(enemy.stats.damage)
+            bullet.kill()
+          }
+        })
+      }
+    })
+
+    // if there is no active enemy
+    if (!this.enemies.children.get("active", true) && !this.waveIsCompleted) this.setWaveComplete()
+
+    this.handleShield(time, delta)
+    this.handleLaser(time, delta)
+
+    this.updateUI()
+  }
 }
 
 const config = {
@@ -405,10 +637,11 @@ const config = {
     default: "arcade",
     arcade: {
       gravity: { y: 0 },
-      debug: true,
+      debug: false,
     },
   },
   scene: [BootScene, WorldScene],
+  pipeline: { Gray1: GrayScalePipeline, Gray2: GrayScalePipeline },
 }
 
 const game = new Phaser.Game(config)
