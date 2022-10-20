@@ -5,6 +5,8 @@ import "./axis"
 import "./style.css"
 import baseImg from "/assets/img/base.png"
 import bgImg from "/assets/img/bg.png"
+import bigT from "/assets/img/big-t.png"
+
 import playerImg from "/assets/img/player.png"
 import turretImg from "/assets/img/turret.png"
 import { Player } from "./classes/player"
@@ -28,9 +30,11 @@ class BootScene extends Phaser.Scene {
     this.load.image("bg", bgImg)
     this.load.image("player", playerImg)
     this.load.image("turret", turretImg)
+    this.load.image("bigT", bigT)
+
   }
   create() {
-    this.scene.start("HighscoreScene")
+    this.scene.start("WorldScene")
   }
 
 }

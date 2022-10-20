@@ -4,9 +4,12 @@ class Bonus extends Phaser.Physics.Arcade.Sprite {
     super(scene, x, y, "bonus")
 
     this.statUpgrade = upgrade
+    this.play("bonus")
+
   }
 
-  update(time, delta) {}
+  update(time, delta) {
+  }
 
   pickUpBonus() {
     this.scene.players.children.each((player) => player.increaseStat(this.statUpgrade))

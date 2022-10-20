@@ -22,7 +22,7 @@ import ropeGrabImg from "/assets/img/ropeGrab.png"
 import laserIconImg from "/assets/ui/laserIcon.png"
 import shieldIconImg from "/assets/ui/shieldIcon.png"
 import buttonsImg from "/assets/ui/buttons.png"
-
+import bigT from '/assets/img/big-t.png'
 import laser_one from "/assets/audios/laser_one.mp3"
 import laser_two from "/assets/audios/laser_two.mp3"
 import explosion_two from "/assets/audios/explosion_two.mp3"
@@ -54,11 +54,12 @@ class BootScene extends Phaser.Scene {
     this.load.image("bullet", bulletImg)
 
     this.load.image("laser", laserImg)
-    this.load.image("bonus", bonusImg)
+    this.load.spritesheet("bonus", bonusImg,  { frameWidth: 32, frameHeight: 32 })
     this.load.image("laserIcon", laserIconImg)
     this.load.image("shieldIcon", shieldIconImg)
     this.load.image("ropeTile", ropeTileImg)
     this.load.image("ropeGrab", ropeGrabImg)
+    this.load.spritesheet("bigT", bigT, { frameWidth: 512, frameHeight: 288 })
 
     this.load.spritesheet("e1000", e1000Img, { frameWidth: 32, frameHeight: 32 })
     this.load.spritesheet("base-shield", baseShieldImg, { frameWidth: 196, frameHeight: 98 })
@@ -86,6 +87,7 @@ class WorldScene extends Phaser.Scene {
   createPlayers() {
     this.players = this.physics.add.group({ classType: Player, runChildUpdate: true })
 
+    
     this.players.create(0, 0, 1, 0.3)
     this.players.create(0, 0, 2, 0.8)
 
@@ -93,6 +95,16 @@ class WorldScene extends Phaser.Scene {
       player.setBase(this.base)
       player.setPositionFromLinear()
     })
+  }
+
+  createBoss() {
+    this.baseScale = 1
+    this.width = 96 * this.baseScale
+    this.height = this.width / 2
+    
+    this.pos = { x: center.x, y: 360 - this.height / 2 }
+    scene.physics.add.image(this.pos.x, this.pos.y, "bigT").setScale(this.baseScale)
+
   }
 
   getEnemiesForWave(currentWave) {
@@ -199,6 +211,20 @@ class WorldScene extends Phaser.Scene {
       frameRate: 10,
       frames: this.anims.generateFrameNumbers("base-shield", { start: 0, end: 6 }),
       repeat: 1,
+    })
+
+    this.anims.create({
+      key: "bonus", 
+      frameRate: 4,
+      frames: this.anims.generateFrameNumbers("bonus", { start: 0, end: 3 }),
+      repeat: -1,
+    })
+
+    this.anims.create({
+      key: "bigT-normal", 
+      frameRate: 4,
+      frames: this.anims.generateFrameNumbers("bigT", { start: 0, end: 2 }),
+      repeat: -1,
     })
   }
 
