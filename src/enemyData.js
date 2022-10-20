@@ -5,8 +5,7 @@ export const enemyData = [
   {
     name: "chaser",
     hp: 1,
-    // speed: 50,
-    speed: 110,
+    speed: 105,
     range: MELEE,
     attackDelay: 0,
     attackSpeed: 0,
@@ -22,7 +21,7 @@ export const enemyData = [
   {
     name: "e1000",
     hp: 3,
-    speed: 70,
+    speed: 90,
     range: RANGED,
     attackDelay: 5,
     attackSpeed: 120,

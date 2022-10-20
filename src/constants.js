@@ -16,6 +16,7 @@ const bonusesStats = {
   fireDelay: -10,
   fireSpeed: 20,
   CDBonus: 0.08,
+  // bulletScale : 0.1
 }
 const bonusesStatsKey = Object.keys(bonusesStats)
 

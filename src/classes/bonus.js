@@ -22,8 +22,6 @@ class Bonus extends Phaser.Physics.Arcade.Sprite {
     }, 5000)
   }
 
-  update(time, delta) {}
-
   pickUpBonus() {
     if (this.statUpgrade === "CDBonus") {
       this.scene.shieldCooldown -= bonusesStats[this.statUpgrade]

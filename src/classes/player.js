@@ -28,6 +28,7 @@ class Player extends Phaser.Physics.Arcade.Image {
     this.cannonBaseStats = {
       fireDelay: 150,
       fireSpeed: 800,
+      bulletScale: 1,
     }
     this.cannonStats = structuredClone(this.cannonBaseStats)
 
@@ -92,6 +93,7 @@ class Player extends Phaser.Physics.Arcade.Image {
 
     const hookPosition = turretPosition.add(bulletDirection.scale(this.hookLength + 30))
     this.hook.setPosition(hookPosition.x, hookPosition.y)
+    this.hook.setRotation(bulletDirection.angle() + Math.PI / 2)
   }
 
   setPositionFromLinear() {
@@ -140,6 +142,7 @@ class Player extends Phaser.Physics.Arcade.Image {
       // up vector, rotate it by the angle of the cannon, the normalize it so speed can be applied and reverse to point outwards
       let bulletDirection = new Phaser.Math.Vector2(0, 1).rotate(this.cannonRotation).normalize().negate()
 
+      bullet.setScale(this.cannonStats.bulletScale)
       bullet.fire({ x: this.x, y: this.y }, bulletDirection, this.cannonStats.fireSpeed)
       this.lastFired = time + this.cannonStats.fireDelay
     }
