@@ -29,6 +29,9 @@ import speedBonusImg from "/assets/img/SpeedSheet.png"
 import slowTextImg from "/assets/img/SlowSheet.png"
 import reverseTextImg from "/assets/img/ReverseSheet.png"
 import boomTextImg from "/assets/img/BoomSheet.png"
+import slowTextAudio from "/assets/audios/boomText.mp3"
+import reverseTextAudio from "/assets/audios/reverseText.mp3"
+import boomTextAudio from "/assets/audios/boomText.mp3"
 
 import laser_one from "/assets/audios/laser_one.mp3"
 import laser_two from "/assets/audios/laser_two.mp3"
@@ -78,6 +81,9 @@ class BootScene extends Phaser.Scene {
     this.load.spritesheet("slowTextImg", slowTextImg, { frameWidth: 2560 / 4, frameHeight: 1440 / 4 })
     this.load.spritesheet("reverseTextImg", reverseTextImg, { frameWidth: 2560 / 4, frameHeight: 1440 / 4 })
     this.load.spritesheet("boomTextImg", boomTextImg, { frameWidth: 2560 / 4, frameHeight: 1440 / 4 })
+    this.load.audio("slowTextImgAudio", slowTextAudio)
+    this.load.audio("reverseTextImgAudio", reverseTextAudio)
+    this.load.audio("boomTextImgAudio", boomTextAudio)
 
     this.load.spritesheet("e1000", e1000Img, { frameWidth: 32, frameHeight: 32 })
     this.load.spritesheet("base-shield", baseShieldImg, { frameWidth: 196, frameHeight: 98 })
@@ -162,6 +168,14 @@ class WorldScene extends Phaser.Scene {
   }
 
   qteMalus() {
+    const qteTimerDuration = 7
+    // slow time
+    this.enemies.children.each((enemy) => {
+      console.log("slow enemies !")
+      enemy.stats.speed = 7
+      enemy.stats.attackSpeed = 15
+    })
+
     const randomKeyIndex = () => Math.floor(Math.random() * 4)
     const randomKeyIndexes = new Array(4).fill("").map(() => randomKeyIndex())
     const chars = ["a", "x", "i", "s"]
@@ -176,7 +190,7 @@ class WorldScene extends Phaser.Scene {
     this.createQTEVisuals()
     this.qteTimer = setTimeout(() => {
       this.onQTEFail()
-    }, 7000)
+    }, qteTimerDuration * 1000)
   }
 
   createQTEVisuals() {
@@ -207,38 +221,55 @@ class WorldScene extends Phaser.Scene {
   }
 
   validateQTE() {
+    this.enemies.children.each((enemy) => {
+      enemy.stats.speed = enemy.statsBackUp.speed
+      enemy.stats.attackSpeed = enemy.statsBackUp.attackSpeed
+    })
     clearTimeout(this.qteTimer)
+    this.isListeningQTE = false
+    this.validatedPresses = []
     this.visuals.clear(true, true)
   }
 
   onQTEFail() {
+    this.enemies.children.each((enemy) => {
+      enemy.stats.speed = enemy.statsBackUp.speed
+      enemy.stats.attackSpeed = enemy.statsBackUp.attackSpeed
+    })
+    clearTimeout(this.qteTimer)
     this.isListeningQTE = false
     this.validatedPresses = []
     this.visuals.clear(true, true)
+
+    this.spawnText("boomTextImg")
     this.base.takeDamage(3)
   }
 
   spawnText(option) {
-    // this.fullScreenText =
+    if (this.fullScreenText?.active) {
+      this.fullScreenText.setActive(false)
+      this.fullScreenText.setVisible(false)
+    }
+    // slowTextImg reverseTextImg boomTextImg
+    this.fullScreenText = this.add.sprite(center.x, center.y, option).setOrigin()
+    this.fullScreenText.alpha = 0.6
+    this.fullScreenText.play(`${option}Anim`)
+
+    let sound = this.sound.add(`${option}Audio`)
+    sound.setVolume(0.3)
+    sound.play()
+
+    this.fullScreenText.on(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
+      this.fullScreenText.setActive(false)
+      this.fullScreenText.setVisible(false)
+    })
   }
 
   createWave() {
     this.waveKills = 0
     this.waveIsCompleted = false
 
-    this.malusProbability = 0.3 + 0.03 * this.waveNumber
-    const triggerMalus = Math.random() < 0.5
-
-    if (triggerMalus) {
-      const ranIndex = Math.floor(Math.random() * 3)
-      if (ranIndex === 0) this.invertControlsMalus()
-      if (ranIndex === 1) this.increaseTearDelayMalus()
-      if (ranIndex === 2) this.qteMalus()
-    }
-    // this.qteMalus()
-
     const enemies = this.getEnemiesForWave(this.waveNumber)
-
     this.waveEnemyCount = enemies.length
 
     const radius = 400
@@ -253,12 +284,21 @@ class WorldScene extends Phaser.Scene {
         y: pos.y + this.base.pos.y + this.base.height / 2,
       }
 
-      this.enemies.create(pos.x, pos.y, enemy)
+      const enemyTemp = this.enemies.create(pos.x, pos.y, enemy)
+      enemyTemp.setTargetPosition(this.base.pos)
     })
 
-    this.enemies.children.each((enemy) => {
-      enemy.setTargetPosition(this.base.pos)
-    })
+    this.malusProbability = 0.3 + 0.03 * this.waveNumber
+    const triggerMalus = Math.random() < this.malusProbability
+
+    console.log(triggerMalus)
+
+    if (triggerMalus) {
+      const ranIndex = Math.floor(Math.random() * 3)
+      if (ranIndex === 0) this.invertControlsMalus()
+      if (ranIndex === 1) this.increaseTearDelayMalus()
+      if (ranIndex === 2) this.qteMalus()
+    }
   }
 
   setWaveComplete() {
@@ -622,10 +662,6 @@ class WorldScene extends Phaser.Scene {
       return
     }
 
-    console.log(this.isListeningQTE)
-
-    console.log("run")
-
     if (e.key === "a") this.isShooting[playerNumber] = true
     if (e.key === "x") {
       if (this.shieldRemainingCooldown === 0) {
@@ -688,9 +724,11 @@ class WorldScene extends Phaser.Scene {
   checkBulletVsEnemy(bullet, enemy) {
     return bullet.active && enemy.active
   }
+
   checkLaserVsEnemy(laser, enemy) {
     return laser.active && enemy.active
   }
+
   checkHookVsBonus(hook, bonus) {
     return hook.active && bonus.active
   }
