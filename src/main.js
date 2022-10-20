@@ -37,6 +37,9 @@ import laser_one from "/assets/audios/laser_one.mp3"
 import laser_two from "/assets/audios/laser_two.mp3"
 import explosion_two from "/assets/audios/explosion_two.mp3"
 import explosion_three from "/assets/audios/explosion_three.mp3"
+import big_laser from "/assets/audios/big_laser.mp3"
+import fireSpeed from "/assets/audios/fireSpeed.mp3"
+import fireDelay from "/assets/audios/fireDelay.mp3"
 
 import note_1 from "/assets/audios/qte_notes/note_1.mp3"
 import note_2 from "/assets/audios/qte_notes/note_2.mp3"
@@ -93,17 +96,92 @@ class BootScene extends Phaser.Scene {
     this.load.audio("laser_two", laser_two)
     this.load.audio("explosion_two", explosion_two)
     this.load.audio("explosion_three", explosion_three)
+    this.load.audio("big_laser", big_laser)
+    this.load.audio("fireDelay", fireDelay)
+    this.load.audio("fireSpeed", fireSpeed)
 
     this.load.audio("note_1", note_1)
     this.load.audio("note_2", note_2)
     this.load.audio("note_3", note_3)
     this.load.audio("note_4", note_4)
   }
-  create() {
-    this.scene.start("WorldScene")
+
+  createAnims() {
+    this.anims.create({
+      key: "e1000-fly",
+      frameRate: 4,
+      frames: this.anims.generateFrameNumbers("e1000", { start: 0, end: 3 }),
+      repeat: -1,
+      yoyo: true,
+      showOnStart: true,
+    })
+    this.anims.create({
+      key: "base-shield-anim",
+      frameRate: 10,
+      frames: this.anims.generateFrameNumbers("base-shield", { start: 0, end: 6 }),
+      repeat: 1,
+    })
+    const buttons = ["a", "x", "i", "s"]
+    for (let i = 0; i < 4; i++) {
+      this.anims.create({
+        key: `button-${buttons[i]}-1-anim`,
+        frameRate: 18,
+        frames: this.anims.generateFrameNumbers(`buttons`, { start: 4 * i, end: 4 * i + 3 }),
+        repeat: 0,
+      })
+    }
+    for (let i = 0; i < 4; i++) {
+      this.anims.create({
+        key: `button-${buttons[i]}-2-anim`,
+        frameRate: 18,
+        frames: this.anims.generateFrameNumbers(`buttons`, { start: 16 + 4 * i, end: 16 + 4 * i + 3 }),
+        repeat: 0,
+      })
+    }
+
+    this.anims.create({
+      key: "fireDelaySpriteAnim",
+      frameRate: 4,
+      frames: this.anims.generateFrameNumbers("fireDelaySprite", { start: 0, end: 3 }),
+      repeat: -1,
+      yoyo: true,
+      showOnStart: true,
+    })
+    this.anims.create({
+      key: "CDBonusSpriteAnim",
+      frameRate: 4,
+      frames: this.anims.generateFrameNumbers("CDBonusSprite", { start: 0, end: 3 }),
+      repeat: -1,
+      yoyo: true,
+      showOnStart: true,
+    })
+    this.anims.create({
+      key: "fireSpeedSpriteAnim",
+      frameRate: 4,
+      frames: this.anims.generateFrameNumbers("fireSpeedSprite", { start: 0, end: 3 }),
+      repeat: -1,
+      yoyo: true,
+      showOnStart: true,
+    })
+    this.anims.create({
+      key: "slowTextImgAnim",
+      frameRate: 15,
+      frames: this.anims.generateFrameNumbers("slowTextImg", { start: 0, end: 15 }),
+    })
+    this.anims.create({
+      key: "reverseTextImgAnim",
+      frameRate: 15,
+      frames: this.anims.generateFrameNumbers("reverseTextImg", { start: 0, end: 15 }),
+    })
+    this.anims.create({
+      key: "boomTextImgAnim",
+      frameRate: 15,
+      frames: this.anims.generateFrameNumbers("boomTextImg", { start: 0, end: 15 }),
+    })
   }
 
-  startWorldScene() {
+  create() {
+    this.createAnims()
     this.scene.start("WorldScene")
   }
 }
@@ -139,7 +217,7 @@ class WorldScene extends Phaser.Scene {
   }
 
   invertControlsMalus() {
-    console.log(this.players)
+    this.spawnText("reverseTextImg")
     this.players.children.entries[0].invertedControls = true
     this.players.children.entries[1].invertedControls = true
 
@@ -150,8 +228,8 @@ class WorldScene extends Phaser.Scene {
   }
 
   increaseTearDelayMalus() {
+    this.spawnText("slowTextImg")
     let kills = 0
-    console.log(this.players)
     this.players.children.entries[0].cannonStats.fireDelay = 250
     this.players.children.entries[0].cannonStats.fireDelay = 250
 
@@ -171,7 +249,6 @@ class WorldScene extends Phaser.Scene {
     const qteTimerDuration = 7
     // slow time
     this.enemies.children.each((enemy) => {
-      console.log("slow enemies !")
       enemy.stats.speed = 7
       enemy.stats.attackSpeed = 15
     })
@@ -291,8 +368,6 @@ class WorldScene extends Phaser.Scene {
     this.malusProbability = 0.3 + 0.03 * this.waveNumber
     const triggerMalus = Math.random() < this.malusProbability
 
-    console.log(triggerMalus)
-
     if (triggerMalus) {
       const ranIndex = Math.floor(Math.random() * 3)
       if (ranIndex === 0) this.invertControlsMalus()
@@ -311,82 +386,7 @@ class WorldScene extends Phaser.Scene {
     const t = this.time.delayedCall(3000, this.createWave, [], this)
   }
 
-  createAnims() {
-    this.anims.create({
-      key: "e1000-fly",
-      frameRate: 4,
-      frames: this.anims.generateFrameNumbers("e1000", { start: 0, end: 3 }),
-      repeat: -1,
-      yoyo: true,
-      showOnStart: true,
-    })
-    this.anims.create({
-      key: "base-shield-anim",
-      frameRate: 10,
-      frames: this.anims.generateFrameNumbers("base-shield", { start: 0, end: 6 }),
-      repeat: 1,
-    })
-    const buttons = ["a", "x", "i", "s"]
-    for (let i = 0; i < 4; i++) {
-      this.anims.create({
-        key: `button-${buttons[i]}-1-anim`,
-        frameRate: 18,
-        frames: this.anims.generateFrameNumbers(`buttons`, { start: 4 * i, end: 4 * i + 3 }),
-        repeat: 0,
-      })
-    }
-    for (let i = 0; i < 4; i++) {
-      this.anims.create({
-        key: `button-${buttons[i]}-2-anim`,
-        frameRate: 18,
-        frames: this.anims.generateFrameNumbers(`buttons`, { start: 16 + 4 * i, end: 16 + 4 * i + 3 }),
-        repeat: 0,
-      })
-    }
-
-    this.anims.create({
-      key: "fireDelaySpriteAnim",
-      frameRate: 4,
-      frames: this.anims.generateFrameNumbers("fireDelaySprite", { start: 0, end: 3 }),
-      repeat: -1,
-      yoyo: true,
-      showOnStart: true,
-    })
-    this.anims.create({
-      key: "CDBonusSpriteAnim",
-      frameRate: 4,
-      frames: this.anims.generateFrameNumbers("CDBonusSprite", { start: 0, end: 3 }),
-      repeat: -1,
-      yoyo: true,
-      showOnStart: true,
-    })
-    this.anims.create({
-      key: "fireSpeedSpriteAnim",
-      frameRate: 4,
-      frames: this.anims.generateFrameNumbers("fireSpeedSprite", { start: 0, end: 3 }),
-      repeat: -1,
-      yoyo: true,
-      showOnStart: true,
-    })
-    this.anims.create({
-      key: "slowTextImgAnim",
-      frameRate: 15,
-      frames: this.anims.generateFrameNumbers("slowTextImg", { start: 0, end: 15 }),
-    })
-    this.anims.create({
-      key: "reverseTextImgAnim",
-      frameRate: 15,
-      frames: this.anims.generateFrameNumbers("reverseTextImg", { start: 0, end: 15 }),
-    })
-    this.anims.create({
-      key: "boomTextImgAnim",
-      frameRate: 15,
-      frames: this.anims.generateFrameNumbers("boomTextImg", { start: 0, end: 15 }),
-    })
-  }
-
   create() {
-    this.createAnims()
     this.add.image(0, 0, "bg").setOrigin(0, 0)
 
     this.base = new Base(this, center.x, center.y)

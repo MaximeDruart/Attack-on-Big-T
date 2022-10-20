@@ -32,8 +32,15 @@ class Bonus extends Phaser.Physics.Arcade.Sprite {
       this.scene.laserCooldown -= bonusesStats[this.statUpgrade] * 2
       this.laserCooldown = Math.max(this.laserCooldown, 2.5)
     } else {
+      this.playAudio()
       this.scene.players.children.each((player) => player.increaseStat(this.statUpgrade))
     }
+  }
+
+  playAudio() {
+    let sound = this.scene.sound.add(this.statUpgrade)
+    sound.setVolume(0.45)
+    sound.play()
   }
 
   kill() {
