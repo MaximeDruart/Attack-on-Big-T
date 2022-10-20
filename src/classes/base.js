@@ -15,6 +15,7 @@ class Base extends Phaser.Physics.Arcade.Image {
     this.shieldSprite = scene.add.sprite(this.pos.x, this.pos.y, "base-shield").setScale(0.5)
     this.shieldSprite.alpha = 0
 
+    this.lives = 3
     this.hp = 10
     this.isShieldActivated = false
   }
@@ -46,8 +47,16 @@ class Base extends Phaser.Physics.Arcade.Image {
     this.scene.hpText.setText(`hp: ${this.hp}`)
     this.scene.cameras.main.shake(50, 0.01)
 
+    this.hp = Math.max(this.hp, 0)
+
     if (this.hp <= 0) {
-      // lose
+      this.hp = 10
+      this.lives -= 1
+      this.lives = Math.max(this.lives, 0)
+
+      if (this.lives <= 0) {
+        // game over
+      }
     }
   }
 

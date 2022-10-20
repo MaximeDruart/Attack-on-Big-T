@@ -55,7 +55,7 @@ import { Bonus } from "./classes/bonus"
 import GrayScalePipeline from "./pipelines/grayScale"
 
 import { gamepadEmulator, player1axis, player2axis } from "./axis"
-import { resolutionMultiplicator, center, bonusesStats, bonusesStatsKey } from "./constants"
+import { center, bonusesStatsKey } from "./constants"
 import { enemyData } from "./enemyData"
 
 class BootScene extends Phaser.Scene {
@@ -331,11 +331,11 @@ class WorldScene extends Phaser.Scene {
   }
 
   spawnText(option) {
+    // slowTextImg reverseTextImg boomTextImg
     if (this.fullScreenText?.active) {
       this.fullScreenText.setActive(false)
       this.fullScreenText.setVisible(false)
     }
-    // slowTextImg reverseTextImg boomTextImg
     this.fullScreenText = this.add.sprite(center.x, center.y, option).setOrigin()
     this.fullScreenText.alpha = 0.6
     this.fullScreenText.play(`${option}Anim`)
@@ -376,7 +376,7 @@ class WorldScene extends Phaser.Scene {
     this.malusProbability = 0.3 + 0.03 * this.waveNumber
     const triggerMalus = Math.random() < this.malusProbability
 
-    if (triggerMalus) {
+    if (triggerMalus && this.waveNumber !== 0) {
       const ranIndex = Math.floor(Math.random() * 3)
       if (ranIndex === 0) this.invertControlsMalus()
       if (ranIndex === 1) this.increaseTearDelayMalus()
@@ -439,8 +439,6 @@ class WorldScene extends Phaser.Scene {
   }
 
   createUI() {
-    this.shieldCDText = this.add.text(0, 0, "shield cd: 0", { font: "15px Courier", fill: "#00ff00" })
-    this.laserCDText = this.add.text(0, 30, "laser cd: 0", { font: "15px Courier", fill: "#00ff00" })
     this.scoreText = this.add.text(500, 0, "score: 0", { font: "15px Courier", fill: "#00ff00" })
     this.hpText = this.add.text(500, 30, `hp: ${this.base.hp}`, { font: "15px Courier", fill: "#00ff00" })
 
@@ -794,7 +792,6 @@ class WorldScene extends Phaser.Scene {
     if (this.shieldRemainingCooldown > 0) {
       this.shieldRemainingCooldown -= delta / (this.shieldCooldown * 1000)
 
-      this.shieldCDText.setText(`shield cd: ${this.shieldRemainingCooldown.toFixed(2)}`)
       this.shieldRemainingCooldown = Math.max(this.shieldRemainingCooldown, 0)
     }
 
@@ -841,7 +838,6 @@ class WorldScene extends Phaser.Scene {
     if (this.laserRemainingCooldown > 0) {
       this.laserRemainingCooldown -= delta / (this.laserCooldown * 1000)
 
-      this.laserCDText.setText(`laser cd: ${this.laserRemainingCooldown.toFixed(2)}`)
       this.laserRemainingCooldown = Math.max(this.laserRemainingCooldown, 0)
     }
 
