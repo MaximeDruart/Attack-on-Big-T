@@ -10,6 +10,7 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
     super(scene, x, y, name)
 
     this.stats = enemyData.find((enemy) => enemy.name === name)
+    this.statsBackUp = structuredClone(this.stats)
     if (this.stats.range === RANGED) this.play("e1000-fly")
 
     this.isDead = false;
