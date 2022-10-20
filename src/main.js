@@ -769,7 +769,7 @@ class WorldScene extends Phaser.Scene {
   }
 
   objectIsCollidingWithBase(object) {
-    if (!object.active) return false
+    if (!object.active || object.isDead) return false
     const { x, y } = object
 
     const distance = Phaser.Math.Distance.Between(x, y, this.base.pos.x, this.base.pos.y + this.base.height / 2)
