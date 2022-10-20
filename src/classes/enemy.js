@@ -13,6 +13,7 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.statsBackUp = structuredClone(this.stats)
     if (this.stats.range === RANGED) this.play("e1000-fly")
 
+    this.isDead = false
     this.targetPosition = null
 
     this.hp = this.stats.hp
@@ -33,14 +34,16 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
   }
 
   update(time, delta) {
-    this.goTowardsBase()
+    if (!this.isDead) {
+      this.goTowardsBase()
+    }
   }
 
   goTowardsBase() {
     const direction = new Phaser.Math.Vector2().setFromObject(this.targetPosition).subtract(this)
 
     let speed = this.stats.speed
-    if (this.stats.range === RANGED && direction.length() < 800) {
+    if (this.stats.range === RANGED && direction.length() < 270) {
       speed *= 0.3
     }
     direction.normalize().scale(speed)
@@ -66,15 +69,19 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
   }
 
   kill() {
-    //const kill =
+    this.isDead = true
+    this.body.setVelocity(0, 0)
     window.dispatchEvent(new Event("kill"))
     randomAudio(this.scene, ["explosion_two", "explosion_three"], 0.3)
     if (this.stats.range === RANGED) {
       clearInterval(this.shootInterval)
       this.bullets.clear(true, true)
     }
-    this.setActive(false)
-    this.setVisible(false)
+    this.play("explosion-anim")
+    setTimeout(() => {
+      this.setActive(false)
+      this.setVisible(false)
+    }, 500)
     this.body.stop()
   }
 

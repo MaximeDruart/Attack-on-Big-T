@@ -10,6 +10,7 @@ import bulletImg from "/assets/img/pellet.png"
 import chaserImg from "/assets/img/chaser.png"
 import e1000Img from "/assets/img/e1000.png"
 import ratImg from "/assets/img/rat.png"
+import explosionImg from "/assets/img/explosions.png"
 
 import bgImg from "/assets/img/bg.png"
 import turretImg from "/assets/img/turret.png"
@@ -90,6 +91,7 @@ class BootScene extends Phaser.Scene {
 
     this.load.spritesheet("e1000", e1000Img, { frameWidth: 32, frameHeight: 32 })
     this.load.spritesheet("base-shield", baseShieldImg, { frameWidth: 196, frameHeight: 98 })
+    this.load.spritesheet("explosion", explosionImg, { frameWidth: 32, frameHeight: 32 })
     this.load.spritesheet("buttons", buttonsImg, { frameWidth: 64, frameHeight: 64 })
 
     this.load.audio("laser_one", laser_one)
@@ -177,6 +179,12 @@ class BootScene extends Phaser.Scene {
       key: "boomTextImgAnim",
       frameRate: 15,
       frames: this.anims.generateFrameNumbers("boomTextImg", { start: 0, end: 15 }),
+    })
+    this.anims.create({
+      key: "explosion-anim",
+      frameRate: 10,
+      frames: this.anims.generateFrameNumbers("explosion", { start: 0, end: 7 }),
+      repeat: 0,
     })
   }
 
@@ -720,7 +728,8 @@ class WorldScene extends Phaser.Scene {
   }
 
   checkBulletVsEnemy(bullet, enemy) {
-    return bullet.active && enemy.active
+    if (!enemy.isDead) return bullet.active && enemy.active
+    return false
   }
 
   checkLaserVsEnemy(laser, enemy) {
@@ -760,7 +769,7 @@ class WorldScene extends Phaser.Scene {
   }
 
   objectIsCollidingWithBase(object) {
-    if (!object.active) return false
+    if (!object.active || object.isDead) return false
     const { x, y } = object
 
     const distance = Phaser.Math.Distance.Between(x, y, this.base.pos.x, this.base.pos.y + this.base.height / 2)

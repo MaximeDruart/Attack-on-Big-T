@@ -21,7 +21,7 @@ export const enemyData = [
   {
     name: "e1000",
     hp: 3,
-    speed: 90,
+    speed: 60,
     range: RANGED,
     attackDelay: 5,
     attackSpeed: 120,
