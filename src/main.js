@@ -514,12 +514,23 @@ class WorldScene extends Phaser.Scene {
 
   updateScore(inc) {
     this.score += inc
-    this.scoreText.setText(`score: ${this.score}`)
+    this.scoreText.setText(this.score.toString().padStart(6, "0"))
   }
 
   createUI() {
-    this.scoreText = this.add.text(500, 0, "score: 0", { font: "15px Courier", fill: "#00ff00" })
-    this.hpText = this.add.text(500, 30, `hp: ${this.base.hp}`, { font: "15px Courier", fill: "#00ff00" })
+    // idk but it works
+    document.fonts.ready.then(() => {
+      this.scoreTextNull = this.add.text(500, 0, "000000", { fontFamily: "retrograde, Courier", fill: "#ffffff" })
+      this.scoreTextNull.alpha = 0
+    })
+
+    document.fonts.onloadingdone = (fontFaceSetEvent) => {
+      this.scoreText = this.add
+        .text(630, 0, "000000", { fontFamily: "retrograde, Courier", fill: "#ffffff" })
+        .setOrigin(1, 0)
+    }
+
+    this.hpText = this.add.text(5, 5, `hp: ${this.base.hp}`, { font: "15px Courier", fill: "#00ff00" }).setOrigin(0, 0)
 
     const color = 0x000000 // mult
     const alpha = 0.2
