@@ -63,6 +63,14 @@ class BootScene extends Phaser.Scene {
     this.load.spritesheet("e1000", e1000Img, { frameWidth: 32, frameHeight: 32 })
     this.load.spritesheet("base-shield", baseShieldImg, { frameWidth: 196, frameHeight: 98 })
     this.load.spritesheet("buttons", buttonsImg, { frameWidth: 64, frameHeight: 64 })
+    // this.load.spritesheet("button-x-1", buttonsImg, { frameWidth: 64, frameHeight: 64, startFrame: 4, endFrame: 7 })
+    // this.load.spritesheet("buttons-i-1", buttonsImg, { frameWidth: 64, frameHeight: 64, startFrame: 8, endFrame: 11 })
+    // this.load.spritesheet("buttons-s-1", buttonsImg, { frameWidth: 64, frameHeight: 64, startFrame: 12, endFrame: 15 })
+
+    // this.load.spritesheet("button-a-2", buttonsImg, { frameWidth: 64, frameHeight: 64, startFrame: 16, endFrame: 19 })
+    // this.load.spritesheet("button-x-2", buttonsImg, { frameWidth: 64, frameHeight: 64, startFrame: 20, endFrame: 23 })
+    // this.load.spritesheet("buttons-i-2", buttonsImg, { frameWidth: 64, frameHeight: 64, startFrame: 24, endFrame: 27 })
+    // this.load.spritesheet("buttons-s-2", buttonsImg, { frameWidth: 64, frameHeight: 64, startFrame: 28, endFrame: 31 })
 
     this.load.audio("laser_one", laser_one)
     this.load.audio("laser_two", laser_two)
@@ -137,7 +145,40 @@ class WorldScene extends Phaser.Scene {
     })
   }
 
-  qteMalus() {}
+  qteMalus() {
+    this.sequence = [
+      { key: "a", player: "1" },
+      { key: "x", player: "2" },
+      { key: "i", player: "1" },
+      { key: "s", player: "2" },
+    ]
+    this.isListeningQTE = true
+    this.validatedPresses = []
+    this.createQTEVisuals()
+  }
+
+  createQTEVisuals() {
+    this.visuals = this.add.group()
+    this.visuals.create(150 + 70 * 1, center.y, "buttons")
+    this.visuals.create(150 + 70 * 2, center.y, "buttons", 16 + 4)
+    this.visuals.create(150 + 70 * 3, center.y, "buttons", 8)
+    this.visuals.create(150 + 70 * 4, center.y, "buttons", 16 + 12)
+  }
+
+  qteValidate(pressKey) {
+    if (pressKey == this.sequence[this.validatedPresses.length].key) {
+      this.visuals.children.entries[this.validatedPresses.length].play()
+      this.validatedPresses.push(pressKey)
+    } else {
+      this.onQTEFail()
+    }
+  }
+
+  onQTEFail() {
+    this.isListeningQTE = false
+    this.validatedPresses = []
+    this.base.takeDamage(3)
+  }
 
   createWave() {
     this.waveKills = 0
@@ -146,12 +187,13 @@ class WorldScene extends Phaser.Scene {
     this.malusProbability = 0.3 + 0.03 * this.waveNumber
     const triggerMalus = Math.random() < 0.5
 
-    if (triggerMalus) {
-      const ranIndex = Math.floor(Math.random() * 3)
-      if (ranIndex === 0) this.invertControlsMalus()
-      if (ranIndex === 1) this.increaseTearDelayMalus()
-      if (ranIndex === 2) this.qteMalus()
-    }
+    // if (triggerMalus) {
+    //   const ranIndex = Math.floor(Math.random() * 3)
+    //   if (ranIndex === 0) this.invertControlsMalus()
+    //   if (ranIndex === 1) this.increaseTearDelayMalus()
+    //   if (ranIndex === 2) this.qteMalus()
+    // }
+    // this.qteMalus()
 
     const enemies = this.getEnemiesForWave(this.waveNumber)
 
@@ -193,6 +235,8 @@ class WorldScene extends Phaser.Scene {
       frameRate: 4,
       frames: this.anims.generateFrameNumbers("e1000", { start: 0, end: 3 }),
       repeat: -1,
+      yoyo: true,
+      showOnStart: true,
     })
     this.anims.create({
       key: "base-shield-anim",
@@ -200,6 +244,23 @@ class WorldScene extends Phaser.Scene {
       frames: this.anims.generateFrameNumbers("base-shield", { start: 0, end: 6 }),
       repeat: 1,
     })
+    const buttons = ["a", "x", "i", "s"]
+    for (let i = 0; i < 4; i++) {
+      this.anims.create({
+        key: `button-${buttons[i]}-1-anim`,
+        frameRate: 4,
+        frames: this.anims.generateFrameNumbers(`buttons`, { start: 4 * i, end: 4 * i + 3 }),
+        repeat: 0,
+      })
+    }
+    for (let i = 0; i < 4; i++) {
+      this.anims.create({
+        key: `button-${buttons[i]}-2-anim`,
+        frameRate: 4,
+        frames: this.anims.generateFrameNumbers(`buttons`, { start: 16 + 4 * i, end: 16 + 4 * i + 3 }),
+        repeat: 0,
+      })
+    }
   }
 
   create() {
@@ -250,7 +311,8 @@ class WorldScene extends Phaser.Scene {
   createUI() {
     this.shieldCDText = this.add.text(0, 0, "shield cd: 0", { font: "15px Courier", fill: "#00ff00" })
     this.laserCDText = this.add.text(0, 30, "laser cd: 0", { font: "15px Courier", fill: "#00ff00" })
-    this.scoreText = this.add.text(500, 30, "score: 0", { font: "15px Courier", fill: "#00ff00" })
+    this.scoreText = this.add.text(500, 0, "score: 0", { font: "15px Courier", fill: "#00ff00" })
+    this.hpText = this.add.text(500, 30, `hp: ${this.base.hp}`, { font: "15px Courier", fill: "#00ff00" })
 
     const color = 0x000000 // mult
     const alpha = 0.2

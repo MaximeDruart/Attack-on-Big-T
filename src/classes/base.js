@@ -42,6 +42,7 @@ class Base extends Phaser.Physics.Arcade.Image {
     if (this.isShieldActivated) {
       return
     }
+    this.scene.hpText.setText(`hp: ${this.hp}`)
     this.scene.cameras.main.shake(50, 0.01)
     this.hp -= damage
     if (this.hp <= 0) {
