@@ -8,6 +8,7 @@ import baseShieldImg from "/assets/img/shield.png"
 import bulletImg from "/assets/img/pellet.png"
 
 import chaserImg from "/assets/img/chaser.png"
+import tardiTrailImg from "/assets/img/tarditrail.png"
 import e1000Img from "/assets/img/e1000.png"
 import ratImg from "/assets/img/rat.png"
 import explosionImg from "/assets/img/explosions.png"
@@ -71,6 +72,7 @@ class BootScene extends Phaser.Scene {
     this.load.image("bg", bgImg)
     this.load.image("turret", turretImg)
     this.load.image("chaser", chaserImg)
+    this.load.spritesheet("tardiTrail", tardiTrailImg, { frameWidth: 16, frameHeight: 16 })
     this.load.image("rat", ratImg)
     this.load.image("bullet", bulletImg)
 
@@ -122,6 +124,12 @@ class BootScene extends Phaser.Scene {
       repeat: -1,
       yoyo: true,
       showOnStart: true,
+    })
+    this.anims.create({
+      key: "tardiTrailAnim",
+      frameRate: 8,
+      frames: this.anims.generateFrameNumbers("tardiTrail"),
+      repeat: -1,
     })
     this.anims.create({
       key: "base-shield-anim",

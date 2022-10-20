@@ -25,12 +25,20 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
         this.stats.attackDelay * Phaser.Math.Between(900, 1100)
       )
     }
+
+    if (name === "chaser") {
+      this.trail = this.scene.add.sprite(0, 0, "tardiTrail")
+      this.trail.play("tardiTrailAnim")
+    }
   }
 
   setTargetPosition(base) {
     this.targetPosition = { x: base.x, y: base.y }
     const direction = new Phaser.Math.Vector2().setFromObject(this.targetPosition).subtract(this)
-    if (direction.x > 0) this.flipX = true
+    if (direction.x > 0) {
+      this.flipX = true
+      if (this.trail) this.trail.flipX = true
+    }
   }
 
   update(time, delta) {
@@ -49,6 +57,13 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
     direction.normalize().scale(speed)
 
     this.body.setVelocity(direction.x, direction.y)
+    if (this.trail) {
+      if (this.flipX) {
+        this.trail.setPosition(this.x - 8, this.y - 6)
+      } else {
+        this.trail.setPosition(this.x + 8, this.y - 6)
+      }
+    }
   }
 
   registerHit(hitDamage = 1) {
@@ -81,6 +96,10 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
     setTimeout(() => {
       this.setActive(false)
       this.setVisible(false)
+      if (this.trail) {
+        this.trail.setActive(false)
+        this.trail.setVisible(false)
+      }
     }, 500)
     this.body.stop()
   }
