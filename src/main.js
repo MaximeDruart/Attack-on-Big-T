@@ -18,6 +18,7 @@ import laserImg from "/assets/img/laser.png"
 import bonusImg from "/assets/img/bonus.png"
 import ropeTileImg from "/assets/img/ropeTile.png"
 import ropeGrabImg from "/assets/img/ropeGrab.png"
+import bigT from "/assets/img/boss.png"
 
 import laserIconImg from "/assets/ui/laserIcon.png"
 import shieldIconImg from "/assets/ui/shieldIcon.png"
@@ -43,7 +44,6 @@ import big_laser from "/assets/audios/big_laser.mp3"
 import fireSpeed from "/assets/audios/fireSpeed.mp3"
 import fireDelay from "/assets/audios/fireDelay.mp3"
 import bulletScale from "/assets/audios/bulletScale.mp3"
-
 import note_1 from "/assets/audios/qte_notes/note_1.mp3"
 import note_2 from "/assets/audios/qte_notes/note_2.mp3"
 import note_3 from "/assets/audios/qte_notes/note_3.mp3"
@@ -79,6 +79,7 @@ class BootScene extends Phaser.Scene {
     this.load.image("shieldIcon", shieldIconImg)
     this.load.image("ropeTile", ropeTileImg)
     this.load.image("ropeGrab", ropeGrabImg)
+    this.load.spritesheet("bigT", bigT, { frameWidth: 512, frameHeight: 288 })
 
     this.load.spritesheet("fireDelaySprite", cadenceBonusImg, { frameWidth: 36, frameHeight: 32 })
     this.load.spritesheet("CDBonusSprite", cdBonusImg, { frameWidth: 36, frameHeight: 32 })
@@ -111,6 +112,7 @@ class BootScene extends Phaser.Scene {
     this.load.audio("note_3", note_3)
     this.load.audio("note_4", note_4)
   }
+
 
   createAnims() {
     this.anims.create({
@@ -197,6 +199,34 @@ class BootScene extends Phaser.Scene {
       frameRate: 10,
       frames: this.anims.generateFrameNumbers("explosion", { start: 0, end: 7 }),
       repeat: 0,
+    })
+
+    this.anims.create({
+      key: "boss-idle", 
+      frameRate: 1, 
+      frames: this.anims.generateFrameNumbers("bigT", { start: 0, end: 1}), 
+      repeat: -1
+    })
+
+    this.anims.create({
+      key: "boss-laugh", 
+      frameRate: 1, 
+      frames: this.anims.generateFrameNumbers("bigT", { start: 2, end: 3}), 
+      // repeat: -1
+    })
+
+    this.anims.create({
+      key: "boss-angry", 
+      frameRate: 1, 
+      frames: this.anims.generateFrameNumbers("bigT", { start: 4, end: 5}), 
+      repeat: -1
+    })
+
+    this.anims.create({
+      key: "boss-strange", 
+      frameRate: 1, 
+      frames: this.anims.generateFrameNumbers("bigT", { start: 5, end: 6}), 
+      repeat: -1
     })
   }
 
@@ -387,6 +417,7 @@ class WorldScene extends Phaser.Scene {
 
     this.malusProbability = 0.3 + 0.03 * this.waveNumber
     const triggerMalus = Math.random() < this.malusProbability
+    
 
     if (triggerMalus && this.waveNumber !== 0) {
       const ranIndex = Math.floor(Math.random() * 3)
@@ -394,13 +425,22 @@ class WorldScene extends Phaser.Scene {
       if (ranIndex === 1) this.increaseTearDelayMalus()
       if (ranIndex === 2) this.qteMalus()
     }
+
+        // big t 
+        setTimeout(() => {
+          this.bigT.play("boss-idle")
+        }, 3000);
+        
+        if (triggerMalus) {
+          this.bigT.play("boss-laugh")
+        }
   }
 
   setWaveComplete() {
     this.waveNumber++
     this.enemies.clear(true, true)
     this.waveIsCompleted = true
-
+    this.bigT.play("boss-angry")
     this.updateScore(100 + this.waveNumber * 0.3 * 30)
 
     const t = this.time.delayedCall(3000, this.createWave, [], this)
@@ -408,7 +448,9 @@ class WorldScene extends Phaser.Scene {
 
   create() {
     this.add.image(0, 0, "bg").setOrigin(0, 0)
-
+    this.bigT = this.add.sprite(center.x, center.y, "bigT")
+    this.bigT.alpha = 0.8
+    this.bigT.play("boss-idle");
     this.base = new Base(this, center.x, center.y)
 
     this.waveNumber = 0
