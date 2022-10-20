@@ -15,6 +15,7 @@ const ranges = {
 const bonusesStats = {
   fireDelay: -10,
   fireSpeed: 20,
+  CDBonus: 0.08,
 }
 const bonusesStatsKey = Object.keys(bonusesStats)
 
