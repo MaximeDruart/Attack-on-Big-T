@@ -3,10 +3,10 @@ const { MELEE, RANGED } = ranges
 
 export const enemyData = [
   {
-    name: "mini-tardiveau",
+    name: "chaser",
     hp: 1,
     // speed: 50,
-    speed: 200,
+    speed: 110,
     range: MELEE,
     attackDelay: 0,
     attackSpeed: 0,
@@ -20,7 +20,7 @@ export const enemyData = [
     },
   },
   {
-    name: "E-1000",
+    name: "e1000",
     hp: 3,
     speed: 70,
     range: RANGED,
@@ -34,7 +34,7 @@ export const enemyData = [
     },
   },
   {
-    name: "tardi-rat",
+    name: "chaser",
     hp: 1,
     speed: 200,
     range: "MELEE",
@@ -48,7 +48,7 @@ export const enemyData = [
     },
   },
   {
-    name: "vigile",
+    name: "chaser",
     hp: 10,
     speed: 20,
     range: "MELEE",

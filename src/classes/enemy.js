@@ -2,14 +2,18 @@ import { enemyData } from "../enemyData"
 import { ranges } from "../constants"
 const { RANGED } = ranges
 import { Bullet } from "./bullet"
+import randomAudio from "../randomAudio.js"
 
 class Enemy extends Phaser.Physics.Arcade.Sprite {
   // voir avec maxime si enemy = chaser ou si autre classe EnemyChaser qui extend Enemy
   constructor(scene, x, y, name) {
-    super(scene, x, y, "turret")
-    this.targetPosition = null
+    super(scene, x, y, name)
 
     this.stats = enemyData.find((enemy) => enemy.name === name)
+    if (this.stats.range === RANGED) this.play("e1000-fly")
+
+    this.targetPosition = null
+
     this.hp = this.stats.hp
 
     if (this.stats.range === RANGED) {
@@ -23,6 +27,8 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
 
   setTargetPosition(base) {
     this.targetPosition = { x: base.x, y: base.y }
+    const direction = new Phaser.Math.Vector2().setFromObject(this.targetPosition).subtract(this)
+    if (direction.x > 0) this.flipX = true
   }
 
   update(time, delta) {
@@ -53,12 +59,15 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
         this.setTint(Phaser.Display.Color.GetColor(value, value, 255))
       },
     })
+    // registering damage and not allowing values under 0
     this.hp -= hitDamage
+    this.hp = Math.max(this.hp, 0)
   }
 
   kill() {
     //const kill =
-    window.dispatchEvent(new Event("kill"));
+    window.dispatchEvent(new Event("kill"))
+    randomAudio(this.scene, ["explosion_two", "explosion_three"], 0.3)
     if (this.stats.range === RANGED) {
       clearInterval(this.shootInterval)
       this.bullets.clear(true, true)

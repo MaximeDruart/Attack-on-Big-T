@@ -1,12 +1,15 @@
 import { mapRange } from "../utils"
 import { Bullet } from "./bullet"
+import randomAudio from "../randomAudio.js"
+import { Laser } from "./laser"
+import { bonusesStats } from "../constants"
 
 class Player extends Phaser.Physics.Arcade.Image {
   constructor(scene, x, y, playerNumber, linearPosition) {
     super(scene, x, y, "turret")
 
     this.playerNumber = playerNumber
-    this.speed = 0.005
+    this.speed = 0.018
 
     scene.add.existing(this)
     scene.physics.add.existing(this)
@@ -15,13 +18,6 @@ class Player extends Phaser.Physics.Arcade.Image {
     this.linearPosition = linearPosition
 
     this.bullets = scene.physics.add.group({ classType: Bullet, maxSize: 30, runChildUpdate: true })
-
-    // add 10 bullets
-    // for (let i = 0; i < 20; i++) {
-    //   const bullet = this.bullets.create(0, 0, "turret").setScale(2, 0.3)
-    //   bullet.setActive(false)
-    //   bullet.setVisible(false)
-    // }
 
     this.cannonRotation = 0
 
@@ -33,13 +29,69 @@ class Player extends Phaser.Physics.Arcade.Image {
       fireDelay: 150,
       fireSpeed: 800,
     }
+
+    this.laser = new Laser(this.scene)
+    this.isShootingLaser = false
+
+    this.ropeSpriteWidth = 12
+    this.rope = scene.add.tileSprite(100, 100, this.ropeSpriteWidth, 0, "ropeTile")
+
+    this.hook = scene.physics.add.image(0, 0, "ropeGrab")
+
+    this.rope.setActive(true)
+    this.rope.setVisible(true)
+    this.hook.setActive(false)
+    this.hook.setVisible(false)
+
+    this.isShootingHook = false
+    this.hookLength = 0
+    this.hookSpeed = 0.4
+    this.hookRetractionSpeed = 0.7
+    this.maxHookLength = 600
   }
 
-  addedToScene() {
-    // this.setPositionFromLinear()
+  update(time, delta) {
+    if (this.isShootingLaser) {
+      this.laser.updateLaserPosition(
+        this,
+        new Phaser.Math.Vector2(0, 1).rotate(this.cannonRotation).normalize().negate()
+      )
+    }
+
+    if (!this.isShootingHook) {
+      if (this.hookLength > 0) {
+        this.hookLength -= this.hookRetractionSpeed * delta
+        this.hookLength = Math.max(this.hookLength, 0)
+        if (this.hookLength === 0) {
+          this.hook.setActive(false)
+          this.hook.setVisible(false)
+          this.rope.setActive(false)
+          this.rope.setVisible(false)
+        }
+      }
+    } else {
+      this.hookLength += delta * this.hookSpeed
+      this.hookLength = Math.min(this.hookLength, this.maxHookLength)
+    }
+    this.updateHookPosition()
   }
 
-  update(t, dt) {}
+  updateHookPosition() {
+    const turretPosition = new Phaser.Math.Vector2(this.x, this.y)
+    let bulletDirection = new Phaser.Math.Vector2(0, 1).rotate(this.cannonRotation).normalize().negate()
+
+    this.rope.height = this.hookLength
+
+    const ropePosition = new Phaser.Math.Vector2(this.x, this.y)
+    const ropeDir = bulletDirection.clone()
+    ropePosition.add(ropeDir.scale(this.rope.height / 2 + this.height / 2))
+
+    this.rope.setPosition(ropePosition.x, ropePosition.y)
+    this.rope.setRotation(bulletDirection.angle() + Math.PI / 2)
+
+    const hookPosition = turretPosition.add(bulletDirection.scale(this.hookLength + 30))
+    this.hook.setPosition(hookPosition.x, hookPosition.y)
+  }
 
   setPositionFromLinear() {
     const az = this.linearPosition * Math.PI - Math.PI
@@ -58,11 +110,15 @@ class Player extends Phaser.Physics.Arcade.Image {
     this.base = base
   }
 
+  increaseStat(statKey) {
+    this.cannonStats[statKey] += bonusesStats[statKey]
+  }
+
   movePlayer(dir, otherPlayerLinear) {
     this.tempLinear = this.linearPosition + dir * this.speed
 
     // would need to be calculated from the actual width of the turret and the total width to get the accurate linear value but hey we got 3 days
-    const turretWidthInLinear = 0.03
+    const turretWidthInLinear = 0.06
 
     let canMove =
       this.tempLinear + turretWidthInLinear < otherPlayerLinear - turretWidthInLinear ||
@@ -79,12 +135,38 @@ class Player extends Phaser.Physics.Arcade.Image {
     if (time < this.lastFired) return
     const bullet = this.bullets.get()
     if (bullet) {
+      randomAudio(this.scene, ["laser_one", "laser_two"], 0.3)
       // up vector, rotate it by the angle of the cannon, the normalize it so speed can be applied and reverse to point outwards
       let bulletDirection = new Phaser.Math.Vector2(0, 1).rotate(this.cannonRotation).normalize().negate()
 
       bullet.fire({ x: this.x, y: this.y }, bulletDirection, this.cannonStats.fireSpeed)
       this.lastFired = time + this.cannonStats.fireDelay
     }
+  }
+
+  shootLaser(duration) {
+    let bulletDirection = new Phaser.Math.Vector2(0, 1).rotate(this.cannonRotation).normalize().negate()
+    this.laser.fire({ x: this.x, y: this.y }, bulletDirection)
+    this.isShootingLaser = true
+    this.scene.cameras.main.shake(duration * 1000, 0.007)
+    setTimeout(() => {
+      this.isShootingLaser = false
+      this.laser.kill()
+    }, duration * 1000)
+  }
+
+  shootHook() {
+    if (!this.isShootingHook) {
+      this.isShootingHook = true
+      this.hook.setActive(true)
+      this.hook.setVisible(true)
+      this.rope.setActive(true)
+      this.rope.setVisible(true)
+    }
+  }
+
+  stopHook() {
+    this.isShootingHook = false
   }
 }
 
