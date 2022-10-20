@@ -4,10 +4,12 @@ import "./axis"
 
 import "./style.css"
 import baseImg from "./assets/img/base.png"
+import chaserImg from "./assets/img/chaser.png"
+import bulletImg from "./assets/img/pellet.png"
+
 import bgImg from "./assets/img/bg.png"
 import playerImg from "./assets/img/player.png"
 import turretImg from "./assets/img/turret.png"
-import bulletImg from "./assets/img/bullet.png"
 import laserImg from "./assets/img/laser.png"
 import bonusImg from "./assets/img/bonus.png"
 import ropeTileImg from "./assets/img/ropeTile.png"
@@ -42,7 +44,9 @@ class BootScene extends Phaser.Scene {
     this.load.image("bg", bgImg)
     this.load.image("player", playerImg)
     this.load.image("turret", turretImg)
+    this.load.image("chaser", chaserImg)
     this.load.image("bullet", bulletImg)
+
     this.load.image("laser", laserImg)
     this.load.image("bonus", bonusImg)
     this.load.image("laserIcon", laserIconImg)
@@ -132,7 +136,7 @@ class WorldScene extends Phaser.Scene {
 
   create() {
     // add background
-    this.add.image(center.x, center.y, "bg").setScale(resolutionMultiplicator)
+    this.add.image(center.x, center.y, "bg").setScale(4)
 
     this.base = new Base(this, center.x, center.y)
 
@@ -624,8 +628,9 @@ class WorldScene extends Phaser.Scene {
 const config = {
   type: Phaser.AUTO,
   parent: "content",
-  width: 2560 * resolutionMultiplicator,
-  height: 1440 * resolutionMultiplicator,
+  width: 640 ,
+  height: 360,
+  zoom: 2560 / 640,
   // zoom: 2,
   pixelArt: true,
   physics: {
