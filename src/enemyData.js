@@ -35,14 +35,14 @@ export const enemyData = [
   {
     name: "rat",
     hp: 1,
-    speed: 200,
+    speed: 160,
     range: "MELEE",
     attackDelay: 0,
     attackSpeed: 0,
     damage: 1,
     wave: {
       startWave: 5,
-      startCount: 20,
+      startCount: 16,
       waveGrowth: 10,
     },
   },
