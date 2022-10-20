@@ -16,6 +16,13 @@ class Laser extends Phaser.Physics.Arcade.Image {
     this.setVisible(true)
 
     this.updateLaserPosition(origin, dir)
+    this.playAudio()
+  }
+
+  playAudio() {
+    let sound = this.scene.sound.add("big_laser")
+    sound.setVolume(0.45)
+    sound.play()
   }
 
   updateLaserPosition(origin, dir) {
