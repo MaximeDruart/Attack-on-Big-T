@@ -81,8 +81,17 @@ class WorldScene extends Phaser.Scene {
     }
     
     const increaseTearRate = () => {
-      this.players.children.entries[0].cannonStats.fireDelay =  200
-      this.players.children.entries[0].cannonStats.fireDelay =  200
+      let kills = 0;
+      this.players.children.entries[0].cannonStats.fireDelay = 250
+      this.players.children.entries[0].cannonStats.fireDelay = 250
+
+      window.addEventListener('kill', () => {
+        kills++
+        if(this.players.children.entries[0].cannonStats.fireDelay !== 150 && this.players.children.entries[0].cannonStats.fireDelay !==  150) {
+          this.players.children.entries[0].cannonStats.fireDelay -=  10
+          this.players.children.entries[0].cannonStats.fireDelay -=  10
+        }
+      })
     }
 
     const maluses = [invertControls, increaseTearRate]

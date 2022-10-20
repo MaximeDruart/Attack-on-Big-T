@@ -57,6 +57,8 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
   }
 
   kill() {
+    //const kill =
+    window.dispatchEvent(new Event("kill"));
     if (this.stats.range === RANGED) {
       clearInterval(this.shootInterval)
       this.bullets.clear(true, true)
