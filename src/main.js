@@ -103,9 +103,43 @@ class WorldScene extends Phaser.Scene {
     return enemies
   }
 
+  handleMaluses(malusIndex) {
+
+    //invert controls for 10 seconds
+    const invertControls = () => {
+      this.players.children.entries[0].invertedControls = true
+      this.players.children.entries[1].invertedControls = true
+
+      setTimeout(() => {
+        this.players.children.entries[0].invertedControls = false
+        this.players.children.entries[1].invertedControls = false
+      }, 10000)
+    }
+    
+    const increaseTearRate = () => {
+      let kills = 0;
+      this.players.children.entries[0].cannonStats.fireDelay = 250
+      this.players.children.entries[0].cannonStats.fireDelay = 250
+
+      window.addEventListener('kill', () => {
+        kills++
+        if(this.players.children.entries[0].cannonStats.fireDelay !== 150 && this.players.children.entries[0].cannonStats.fireDelay !==  150) {
+          this.players.children.entries[0].cannonStats.fireDelay -=  10
+          this.players.children.entries[0].cannonStats.fireDelay -=  10
+        }
+      })
+    }
+
+    const maluses = [invertControls, increaseTearRate]
+
+    return maluses[malusIndex]()
+  }
+
   createWave() {
     this.waveKills = 0
     this.waveIsCompleted = false
+
+    this.handleMaluses(1)
 
     const enemies = this.getEnemiesForWave(this.waveNumber)
 
@@ -419,10 +453,10 @@ class WorldScene extends Phaser.Scene {
   }
 
   player1JoystickMoveHandler(e) {
-    this.joystickX["1"] = e.position.x
+    this.joystickX["1"] = this.players.children.entries[0].invertedControls ? -e.position.x : e.position.x
   }
   player2JoystickMoveHandler(e) {
-    this.joystickX["2"] = e.position.x
+    this.joystickX["2"] = this.players.children.entries[1].invertedControls ? -e.position.x : e.position.x
   }
 
   keyDownHandler(e, playerNumber) {

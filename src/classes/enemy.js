@@ -65,6 +65,8 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
   }
 
   kill() {
+    //const kill =
+    window.dispatchEvent(new Event("kill"))
     randomAudio(this.scene, ["explosion_two", "explosion_three"], 0.3)
     if (this.stats.range === RANGED) {
       clearInterval(this.shootInterval)
