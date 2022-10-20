@@ -54,7 +54,7 @@ class BootScene extends Phaser.Scene {
     this.load.image("bullet", bulletImg)
 
     this.load.image("laser", laserImg)
-    this.load.spritesheet("bonus", bonusImg,  { frameWidth: 32, frameHeight: 32 })
+    this.load.spritesheet("bonus", bonusImg,  { frameWidth: 36, frameHeight: 32 })
     this.load.image("laserIcon", laserIconImg)
     this.load.image("shieldIcon", shieldIconImg)
     this.load.image("ropeTile", ropeTileImg)
@@ -101,7 +101,7 @@ class WorldScene extends Phaser.Scene {
     this.baseScale = 1
     this.width = 96 * this.baseScale
     this.height = this.width / 2
-    
+
     this.pos = { x: center.x, y: 360 - this.height / 2 }
     scene.physics.add.image(this.pos.x, this.pos.y, "bigT").setScale(this.baseScale)
 
