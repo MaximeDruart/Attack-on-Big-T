@@ -9,7 +9,7 @@ class Player extends Phaser.Physics.Arcade.Image {
     super(scene, x, y, "turret")
 
     this.playerNumber = playerNumber
-    this.speed = 0.015
+    this.speed = 0.018
 
     scene.add.existing(this)
     scene.physics.add.existing(this)
@@ -45,6 +45,7 @@ class Player extends Phaser.Physics.Arcade.Image {
     this.hookLength = 0
     this.hookSpeed = 0.4
     this.hookRetractionSpeed = 0.7
+    this.maxHookLength = 600
   }
 
   update(time, delta) {
@@ -68,7 +69,7 @@ class Player extends Phaser.Physics.Arcade.Image {
       }
     } else {
       this.hookLength += delta * this.hookSpeed
-      this.hookLength = Math.min(this.hookLength, 1200)
+      this.hookLength = Math.min(this.hookLength, this.maxHookLength)
     }
     this.updateHookPosition()
   }
@@ -115,7 +116,7 @@ class Player extends Phaser.Physics.Arcade.Image {
     this.tempLinear = this.linearPosition + dir * this.speed
 
     // would need to be calculated from the actual width of the turret and the total width to get the accurate linear value but hey we got 3 days
-    const turretWidthInLinear = 0.03
+    const turretWidthInLinear = 0.06
 
     let canMove =
       this.tempLinear + turretWidthInLinear < otherPlayerLinear - turretWidthInLinear ||

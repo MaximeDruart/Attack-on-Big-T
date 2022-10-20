@@ -136,6 +136,8 @@ class WorldScene extends Phaser.Scene {
     this.enemies.clear(true, true)
     this.waveIsCompleted = true
 
+    this.updateScore(100 + this.waveNumber * 0.3 * 30)
+
     const t = this.time.delayedCall(3000, this.createWave, [], this)
   }
 
@@ -166,6 +168,8 @@ class WorldScene extends Phaser.Scene {
     this.waveKills = 0
     this.totalKills = 0
 
+    this.score = 0
+
     this.createPlayers()
 
     this.enemies = this.physics.add.group({ classType: Enemy, runChildUpdate: true })
@@ -194,9 +198,15 @@ class WorldScene extends Phaser.Scene {
     this.bonuses.create(x, y, bonusesStatsKey[Math.floor(Math.random() * bonusesStatsKey.length)])
   }
 
+  updateScore(inc) {
+    this.score += inc
+    this.scoreText.setText(`score: ${this.score}`)
+  }
+
   createUI() {
-    this.shieldCDText = this.add.text(0, 0, "shield cd: 0", { font: "25px Courier", fill: "#00ff00" })
-    this.laserCDText = this.add.text(0, 30, "laser cd: 0", { font: "25px Courier", fill: "#00ff00" })
+    this.shieldCDText = this.add.text(0, 0, "shield cd: 0", { font: "15px Courier", fill: "#00ff00" })
+    this.laserCDText = this.add.text(0, 30, "laser cd: 0", { font: "15px Courier", fill: "#00ff00" })
+    this.scoreText = this.add.text(500, 30, "score: 0", { font: "15px Courier", fill: "#00ff00" })
 
     const color = 0x000000 // mult
     const alpha = 0.2
@@ -204,7 +214,7 @@ class WorldScene extends Phaser.Scene {
     this.grayscalePipelineShield = this.renderer.pipelines.get("Gray1")
     this.grayscalePipelineShield.gray = 0
 
-    this.shieldIcon = this.add.sprite(150, 900, "shieldIcon").setPipeline(this.grayscalePipelineShield)
+    this.shieldIcon = this.add.sprite(50, 250, "shieldIcon").setPipeline(this.grayscalePipelineShield)
     this.shieldIconGraphics = this.add.graphics({ x: this.shieldIcon.x, y: this.shieldIcon.y })
 
     this.shieldIconGraphics.fillStyle(color, alpha)
@@ -220,7 +230,7 @@ class WorldScene extends Phaser.Scene {
     this.grayscalePipelineLaser = this.renderer.pipelines.get("Gray2")
     this.grayscalePipelineLaser.gray = 0
 
-    this.laserIcon = this.add.sprite(400, 900, "laserIcon").setPipeline(this.grayscalePipelineLaser)
+    this.laserIcon = this.add.sprite(150, 250, "laserIcon").setPipeline(this.grayscalePipelineLaser)
     this.laserIconGraphics = this.add.graphics({ x: this.laserIcon.x, y: this.laserIcon.y })
 
     this.laserIconGraphics.fillStyle(color, alpha)
@@ -506,6 +516,7 @@ class WorldScene extends Phaser.Scene {
   onEnemyKill(enemy) {
     this.totalKills++
     this.waveKills++
+    this.updateScore(enemy.stats.hp * 5)
     if (Math.random() < this.bonusDropChance) {
       this.createBonus(enemy.x, enemy.y)
     }
