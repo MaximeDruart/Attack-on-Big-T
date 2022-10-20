@@ -5,7 +5,7 @@ class Base extends Phaser.Physics.Arcade.Image {
     super(scene, x, y, "base")
 
     // base image handling
-    this.baseScale = 1
+    this.baseScale = 1.8
     this.width = 654 * this.baseScale
     this.height = this.width / 2
 

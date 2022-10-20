@@ -2,7 +2,7 @@ import { resolutionMultiplicator } from "../constants"
 
 class Bullet extends Phaser.Physics.Arcade.Image {
   constructor(scene) {
-    super(scene, 0, 0, "turret")
+    super(scene, 0, 0, "bullet")
   }
 
   fire(origin, dir, speed) {
