@@ -244,6 +244,7 @@ class BootScene extends Phaser.Scene {
 
   startMusic() {
     let music = this.sound.add('in-game-music',{
+      volume: 0.5,
       loop: true
     });
     music.play()

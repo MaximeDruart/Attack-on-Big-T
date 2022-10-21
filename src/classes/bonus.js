@@ -37,7 +37,7 @@ class Bonus extends Phaser.Physics.Arcade.Sprite {
 
   playAudio() {
     let sound = this.scene.sound.add(this.statUpgrade)
-    sound.setVolume(0.45)
+    sound.setVolume(1.7)
     sound.play()
   }
 
