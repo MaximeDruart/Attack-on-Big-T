@@ -13,6 +13,7 @@ class Laser extends Phaser.Physics.Arcade.Image {
 
   fire(origin, dir) {
     this.setActive(true)
+    this.setDepth(1)
     this.setVisible(true)
 
     this.updateLaserPosition(origin, dir)
