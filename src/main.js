@@ -320,6 +320,7 @@ class WorldScene extends Phaser.Scene {
   }
 
   setGameOver() {
+    this.sound.pauseAll()
     this.scene.start("GameOverScene", { score: this.score })
   }
 

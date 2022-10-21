@@ -1,6 +1,8 @@
 // import GameOverBg from "/assets/img/GameOver.png"
 import GameOverBg from "/assets/img/GameOver.png"
 import buttons from "/assets/img/buttons-screens.png"
+
+import evilLaught from '/assets/audios/evil_laught.mp3'
 import { center } from "../constants"
 import { gamepadEmulator, player1axis, player2axis } from "../axis"
 import Axis from "axis-api"
@@ -11,6 +13,8 @@ class GameOverScene extends Phaser.Scene {
   }
 
   preload() {
+    this.load.audio("evilLaught", evilLaught)
+
     this.load.spritesheet("GameOverBg", GameOverBg, { frameWidth: 640, frameHeight: 360 })
     this.load.spritesheet("menu-button-start", buttons, { frameWidth: 132, frameHeight: 64 })
     this.load.spritesheet("menu-button-score", buttons, { frameWidth: 132, frameHeight: 64 })
@@ -53,6 +57,13 @@ class GameOverScene extends Phaser.Scene {
     const keyDownHandler = this.keyDownHandler.bind(this)
     player1axis.addEventListener("keydown", (e) => keyDownHandler(e, 1))
     player2axis.addEventListener("keydown", (e) => keyDownHandler(e, 2))
+
+    let music = this.sound.add('evilLaught', {
+      volume: 1,
+      loop: false,
+    })
+
+    music.play()
   }
 
   registerScore() {
