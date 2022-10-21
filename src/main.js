@@ -13,7 +13,7 @@ import e1000Img from "/assets/img/e1000.png"
 import ratImg from "/assets/img/rat.png"
 import explosionImg from "/assets/img/explosions.png"
 
-import bgImg from "/assets/img/bg.png"
+import bgImg from "/assets/img/backgroundSheet.png"
 import turretImg from "/assets/img/turret.png"
 import laserImg from "/assets/img/laser.png"
 import bonusImg from "/assets/img/bonus.png"
@@ -57,6 +57,9 @@ import { Base } from "./classes/base"
 import { Enemy } from "./classes/enemy"
 import { Bonus } from "./classes/bonus"
 
+import MenuScene from "./scenes/MenuScene"
+import GameOverScene from "./scenes/GameOverScene"
+
 import GrayScalePipeline from "./pipelines/grayScale"
 
 import { gamepadEmulator, player1axis, player2axis } from "./axis"
@@ -71,7 +74,7 @@ class BootScene extends Phaser.Scene {
 
   preload() {
     this.load.image("base", baseImg)
-    this.load.image("bg", bgImg)
+    this.load.spritesheet("bg", bgImg, { frameWidth: 640, frameHeight: 360 })
     this.load.image("turret", turretImg)
     this.load.image("chaser", chaserImg)
     this.load.spritesheet("tardiTrail", tardiTrailImg, { frameWidth: 16, frameHeight: 16 })
@@ -121,6 +124,13 @@ class BootScene extends Phaser.Scene {
   }
 
   createAnims() {
+    this.anims.create({
+      key: "bg",
+      frameRate: 10,
+      frames: this.anims.generateFrameNumbers("bg"),
+      repeat: -1,
+      yoyo: true,
+    })
     this.anims.create({
       key: "e1000-fly",
       frameRate: 4,
@@ -243,16 +253,17 @@ class BootScene extends Phaser.Scene {
   }
 
   startMusic() {
-    let music = this.sound.add('in-game-music',{
+    let music = this.sound.add("in-game-music", {
       volume: 0.5,
-      loop: true
-    });
+      loop: true,
+    })
     music.play()
   }
 
   create() {
     this.createAnims()
-    this.scene.start("WorldScene")
+    this.scene.start("MenuScene")
+    // this.scene.start("WorldScene")
     this.startMusic()
   }
 }
@@ -261,7 +272,10 @@ class WorldScene extends Phaser.Scene {
   constructor() {
     super("WorldScene")
   }
-
+  setGameOver() {
+    // console.log(this.scene.start);
+    this.scene.start('GameOverScene') 
+  }
   createPlayers() {
     this.players = this.physics.add.group({ classType: Player, runChildUpdate: true })
 
@@ -485,7 +499,8 @@ class WorldScene extends Phaser.Scene {
   }
 
   create() {
-    this.add.image(0, 0, "bg").setOrigin(0, 0)
+    this.bg = this.add.sprite(0, 0, "bg").setOrigin(0, 0)
+    this.bg.play("bg")
     this.bigT = this.add.sprite(center.x, center.y, "bigT")
     this.bigT.alpha = 0.8
     this.bigT.play("boss-idle")
@@ -1021,7 +1036,7 @@ const config = {
       debug: false,
     },
   },
-  scene: [BootScene, WorldScene],
+  scene: [BootScene, WorldScene, MenuScene, GameOverScene],
   pipeline: { Gray1: GrayScalePipeline, Gray2: GrayScalePipeline },
 }
 
