@@ -6,12 +6,14 @@ import { bonusesStats } from "../constants"
 
 class Player extends Phaser.Physics.Arcade.Sprite {
   constructor(scene, x, y, playerNumber, linearPosition) {
+    const color = playerNumber === 1 ? "blue" : "red"
     const img = playerNumber === 1 ? "blueTurret" : "redTurret"
     super(scene, x, y, img)
 
     this.playerNumber = playerNumber
     this.speed = 0.018
     this.img = img
+    this.color = color
 
     scene.add.existing(this)
     scene.physics.add.existing(this)
@@ -137,11 +139,11 @@ class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   shoot(time) {
+    if (this.isShootingLaser) return
     if (time < this.lastFired) return
     const bullet = this.bullets.get()
     if (bullet) {
       randomAudio(this.scene, ["laser_one", "laser_two"], 0.3)
-      console.log(this)
       this.play(this.img + "Anim")
 
       // up vector, rotate it by the angle of the cannon, the normalize it so speed can be applied and reverse to point outwards
@@ -153,6 +155,7 @@ class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   shootLaser(duration) {
+    this.play(this.color + "LaserAnim")
     let bulletDirection = new Phaser.Math.Vector2(0, 1).rotate(this.cannonRotation).normalize().negate()
     this.laser.fire({ x: this.x, y: this.y }, bulletDirection)
     this.isShootingLaser = true
@@ -160,6 +163,7 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     setTimeout(() => {
       this.isShootingLaser = false
       this.laser.kill()
+      this.playReverse(this.color + "LaserAnim")
     }, duration * 1000)
   }
 

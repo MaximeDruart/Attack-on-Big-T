@@ -6,6 +6,7 @@ import "./style.css"
 import baseImg from "/assets/img/base.png"
 import baseShieldImg from "/assets/img/shield.png"
 import bulletImg from "/assets/img/pellet.png"
+import dentImg from "/assets/img/dent.png"
 
 import chaserImg from "/assets/img/chaser.png"
 import tardiTrailImg from "/assets/img/tarditrail.png"
@@ -17,6 +18,8 @@ import bgImg from "/assets/img/backgroundSheet.png"
 import turretImg from "/assets/img/turret.png"
 import redTurretImg from "/assets/img/redGun.png"
 import blueTurretImg from "/assets/img/blueGun.png"
+import redLaserImg from "/assets/img/redLaser.png"
+import blueLaserImg from "/assets/img/blueLaser.png"
 import laserImg from "/assets/img/laser.png"
 import bonusImg from "/assets/img/bonus.png"
 import ropeTileImg from "/assets/img/ropeTile.png"
@@ -83,12 +86,15 @@ class BootScene extends Phaser.Scene {
     this.load.image("turret", turretImg)
     this.load.spritesheet("blueTurret", blueTurretImg, { frameWidth: 48, frameHeight: 48 })
     this.load.spritesheet("redTurret", redTurretImg, { frameWidth: 48, frameHeight: 48 })
+    this.load.spritesheet("blueLaser", blueLaserImg, { frameWidth: 48, frameHeight: 48 })
+    this.load.spritesheet("redLaser", redLaserImg, { frameWidth: 48, frameHeight: 48 })
     this.load.image("chaser", chaserImg)
     this.load.spritesheet("tardiTrail", tardiTrailImg, { frameWidth: 16, frameHeight: 16 })
     this.load.image("rat", ratImg)
     this.load.image("bullet", bulletImg)
+    this.load.image("dent", dentImg)
 
-    this.load.image("laser", laserImg)
+    this.load.spritesheet("laser", laserImg, { frameWidth: 1280 / 2, frameHeight: 1440 / 2 })
     this.load.image("bonus", bonusImg)
     this.load.image("laserIcon", laserIconImg)
     this.load.image("shieldIcon", shieldIconImg)
@@ -149,6 +155,22 @@ class BootScene extends Phaser.Scene {
       key: "redTurretAnim",
       frameRate: 20,
       frames: this.anims.generateFrameNumbers("redTurret"),
+    })
+    this.anims.create({
+      key: "blueLaserAnim",
+      frameRate: 20,
+      frames: this.anims.generateFrameNumbers("blueLaser"),
+    })
+    this.anims.create({
+      key: "redLaserAnim",
+      frameRate: 20,
+      frames: this.anims.generateFrameNumbers("redLaser"),
+    })
+    this.anims.create({
+      key: "laserAnim",
+      frameRate: 6,
+      frames: this.anims.generateFrameNumbers("laser"),
+      repeat: -1,
     })
     this.anims.create({
       key: "e1000-fly",
@@ -300,6 +322,7 @@ class WorldScene extends Phaser.Scene {
   setGameOver() {
     this.scene.start("GameOverScene", { score: this.score })
   }
+
   createPlayers() {
     this.players = this.physics.add.group({ classType: Player, runChildUpdate: true })
 

@@ -106,6 +106,7 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
 
   rangeAttack() {
     const bullet = this.bullets.get()
+    bullet.setTexture("dent")
     if (bullet) {
       let bulletDirection = new Phaser.Math.Vector2().setFromObject(this.targetPosition).subtract(this).normalize()
       bullet.fire({ x: this.x, y: this.y }, bulletDirection, this.stats.attackSpeed)
