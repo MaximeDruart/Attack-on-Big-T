@@ -96,7 +96,7 @@ class GameOverScene extends Phaser.Scene {
     if (e.key === "a") {
       this.startBtn.play("button-start-press")
       setTimeout(() => {
-        this.scene.start("WorldScene")
+        location.reload()
       }, 500)
     }
     if (e.key === "x") {
