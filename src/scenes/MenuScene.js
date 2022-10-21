@@ -1,8 +1,10 @@
 import menuBg from "/assets/img/MainMenu.png"
 import buttons from "/assets/img/buttons-screen-menu.png"
 import menuSprite from "/assets/img/spritesheetMenu.png"
+import introAudio from "/assets/audios/introAudio.mp3"
 import { center } from "../constants"
 import { gamepadEmulator, player1axis, player2axis } from "../axis"
+import inGameAudio from "/assets/audios/inGameAudio.mp3";
 
 class MenuScene extends Phaser.Scene {
   constructor() {
@@ -14,6 +16,9 @@ class MenuScene extends Phaser.Scene {
     this.load.spritesheet("menu-button-start", buttons, { frameWidth: 132, frameHeight: 64 })
     this.load.spritesheet("menu-button-score", buttons, { frameWidth: 132, frameHeight: 64 })
     this.load.spritesheet("menuSprite", menuSprite, { frameWidth: 640, frameHeight: 360 })
+
+    this.load.audio("in-game-music", inGameAudio)
+    this.load.audio('introAudio', introAudio)
   }
 
   create() {
@@ -59,12 +64,15 @@ class MenuScene extends Phaser.Scene {
     player2axis.addEventListener("keydown", this.keyDownFn2)
 
     background.play("menuSpriteAnim")
+    this.sound.play('introAudio')
   }
 
   keyDownHandler(e, playerNumber) {
     if (e.key === "a") {
       this.startBtn.play("button-start-press")
       setTimeout(() => {
+        this.sound.pauseAll()
+        this.sound.play("in-game-music")
         this.input.keyboard.enabled = false
         player1axis.removeEventListener("keydown", this.keyDownFn1)
         player2axis.removeEventListener("keydown", this.keyDownFn2)

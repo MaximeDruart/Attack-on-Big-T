@@ -325,7 +325,7 @@ class BootScene extends Phaser.Scene {
     this.createAnims()
     this.scene.start("MenuScene")
     // this.scene.start("WorldScene")
-    this.startMusic()
+    //this.startMusic()
   }
 }
 
