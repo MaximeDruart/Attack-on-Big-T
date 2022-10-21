@@ -1,5 +1,5 @@
 import menuBg from "/assets/img/MainMenu.png"
-import buttons from "/assets/img/buttons-screens.png"
+import buttons from "/assets/img/buttons-screen-menu.png"
 import menuSprite from "/assets/img/spritesheetMenu.png"
 import { center } from "../constants"
 import { gamepadEmulator, player1axis, player2axis } from "../axis"

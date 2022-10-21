@@ -1,7 +1,7 @@
 // import GameOverBg from "/assets/img/GameOver.png"
 import GameOverBg from "/assets/img/spritesheetOver1.png"
 import GameOverBgLoop from "/assets/img/spritesheetOver2.png"
-import buttons from "/assets/img/buttons-screens.png"
+import buttons from "/assets/img/buttons-screen-gameover.png"
 
 import evilLaught from "/assets/audios/evil_laught.mp3"
 import { center } from "../constants"
