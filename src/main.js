@@ -4,6 +4,7 @@ import Axis from "axis-api"
 
 import "./style.css"
 import baseImg from "/assets/img/base.png"
+import hubTopImg from "/assets/img/hubTop.png"
 import baseShieldImg from "/assets/img/shield.png"
 import bulletImg from "/assets/img/pellet.png"
 import dentImg from "/assets/img/dent.png"
@@ -82,6 +83,7 @@ class BootScene extends Phaser.Scene {
 
   preload() {
     this.load.image("base", baseImg)
+    this.load.image("hubTop", hubTopImg)
     this.load.spritesheet("bg", bgImg, { frameWidth: 640, frameHeight: 360 })
     this.load.image("turret", turretImg)
     this.load.spritesheet("blueTurret", blueTurretImg, { frameWidth: 48, frameHeight: 48 })
@@ -418,10 +420,10 @@ class WorldScene extends Phaser.Scene {
       const randomKeyIndexes = new Array(4).fill("").map(() => randomKeyIndex())
       const chars = ["a", "x", "i", "s"]
       this.sequence = [
-        {key: chars[randomKeyIndexes[0]], keyIndex: randomKeyIndexes[0], player: 1},
-        {key: chars[randomKeyIndexes[1]], keyIndex: randomKeyIndexes[1], player: 2},
-        {key: chars[randomKeyIndexes[2]], keyIndex: randomKeyIndexes[2], player: 1},
-        {key: chars[randomKeyIndexes[3]], keyIndex: randomKeyIndexes[3], player: 2},
+        { key: chars[randomKeyIndexes[0]], keyIndex: randomKeyIndexes[0], player: 1 },
+        { key: chars[randomKeyIndexes[1]], keyIndex: randomKeyIndexes[1], player: 2 },
+        { key: chars[randomKeyIndexes[2]], keyIndex: randomKeyIndexes[2], player: 1 },
+        { key: chars[randomKeyIndexes[3]], keyIndex: randomKeyIndexes[3], player: 2 },
       ]
       this.isListeningQTE = true
       this.validatedPresses = []
