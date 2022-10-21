@@ -609,7 +609,8 @@ class WorldScene extends Phaser.Scene {
   createUI() {
     // idk but it works
     document.fonts.ready.then(() => {
-      this.scoreTextNull = this.add.text(500, 0, "000000", { fontFamily: "retrograde, Courier", fill: "#ffffff" })
+      this.scoreTextNull = this.add.text(500, 0, "000000", { fontFamily: "retrograde", fill: "#ffffff" })
+
       this.scoreTextNull.alpha = 0
     })
 
@@ -618,8 +619,8 @@ class WorldScene extends Phaser.Scene {
         .text(630, 0, "000000", { fontFamily: "retrograde, Courier", fill: "#ffffff" })
         .setOrigin(1, 0)
     }
-
-    this.hpText = this.add.text(5, 5, `hp: ${this.base.hp}`, { font: "15px Courier", fill: "#00ff00" }).setOrigin(0, 0)
+    this.livesText = this.add.text(5, 25, `LIVES: ${this.base.lives}`, { fontFamily: "retrograde", fill: "#ffffff" }).setOrigin(0, 0)
+    this.hpText = this.add.text(5, 5, `HP: ${this.base.hp}`, { fontFamily: "retrograde", fill: "#ffffff" }).setOrigin(0, 0)
 
     const color = 0x000000 // mult
     const alpha = 0.2

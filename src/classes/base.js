@@ -56,6 +56,7 @@ class Base extends Phaser.Physics.Arcade.Image {
       this.hp = 10
       this.lives -= 1
       this.lives = Math.max(this.lives, 0)
+      this.scene.livesText.setText(`LIVES: ${this.lives}`)
 
       if (this.lives <= 0) {
         // game over

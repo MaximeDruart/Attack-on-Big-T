@@ -18,7 +18,7 @@ class GameOverScene extends Phaser.Scene {
 
     this.load.spritesheet("GameOverBg", GameOverBg, { frameWidth: 640, frameHeight: 360 })
     this.load.spritesheet("GameOverBgLoop", GameOverBgLoop, { frameWidth: 640, frameHeight: 360 })
-    this.load.spritesheet("menu-button-start", buttons, { frameWidth: 132, frameHeight: 64 })
+    this.load.spritesheet("go-button-restart", buttons, { frameWidth: 132, frameHeight: 64 })
     this.load.spritesheet("menu-button-score", buttons, { frameWidth: 132, frameHeight: 64 })
   }
 
@@ -30,7 +30,7 @@ class GameOverScene extends Phaser.Scene {
     this.anims.create({
       key: "button-start-press",
       frameRate: 30,
-      frames: this.anims.generateFrameNumbers("menu-button-start", { start: 0, end: 3 }),
+      frames: this.anims.generateFrameNumbers("go-button-restart", { start: 0, end: 3 }),
     })
 
     this.anims.create({
@@ -58,7 +58,7 @@ class GameOverScene extends Phaser.Scene {
     let scale = Math.max(scaleX, scaleY)
     background.setScale(scale).setScrollFactor(0)
 
-    this.startBtn = this.add.sprite(center.x - center.x / 4, center.y + center.y / 1.5, "menu-button-start")
+    this.startBtn = this.add.sprite(center.x - center.x / 4, center.y + center.y / 1.5, "go-button-restart")
     this.scoreBtn = this.add.sprite(center.x + center.x / 4, center.y + center.y / 1.5, "menu-button-score", 4)
 
     const keyDownHandler = this.keyDownHandler.bind(this)
