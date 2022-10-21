@@ -1,8 +1,9 @@
 // import GameOverBg from "/assets/img/GameOver.png"
-import GameOverBg from "/assets/img/GameOver.png"
+import GameOverBg from "/assets/img/spritesheetOver1.png"
+import GameOverBgLoop from "/assets/img/spritesheetOver2.png"
 import buttons from "/assets/img/buttons-screens.png"
 
-import evilLaught from '/assets/audios/evil_laught.mp3'
+import evilLaught from "/assets/audios/evil_laught.mp3"
 import { center } from "../constants"
 import { gamepadEmulator, player1axis, player2axis } from "../axis"
 import Axis from "axis-api"
@@ -16,6 +17,7 @@ class GameOverScene extends Phaser.Scene {
     this.load.audio("evilLaught", evilLaught)
 
     this.load.spritesheet("GameOverBg", GameOverBg, { frameWidth: 640, frameHeight: 360 })
+    this.load.spritesheet("GameOverBgLoop", GameOverBgLoop, { frameWidth: 640, frameHeight: 360 })
     this.load.spritesheet("menu-button-start", buttons, { frameWidth: 132, frameHeight: 64 })
     this.load.spritesheet("menu-button-score", buttons, { frameWidth: 132, frameHeight: 64 })
   }
@@ -38,9 +40,14 @@ class GameOverScene extends Phaser.Scene {
     })
 
     this.anims.create({
-      key: "menu-bg",
-      frameRate: 1,
-      frames: this.anims.generateFrameNumbers("GameOverBg", { start: 0, end: 1 }),
+      key: "gameOverStart",
+      frameRate: 8,
+      frames: this.anims.generateFrameNumbers("GameOverBg"),
+    })
+    this.anims.create({
+      key: "gameOverLoop",
+      frameRate: 8,
+      frames: this.anims.generateFrameNumbers("GameOverBgLoop"),
       repeat: -1,
     })
 
@@ -58,12 +65,16 @@ class GameOverScene extends Phaser.Scene {
     player1axis.addEventListener("keydown", (e) => keyDownHandler(e, 1))
     player2axis.addEventListener("keydown", (e) => keyDownHandler(e, 2))
 
-    let music = this.sound.add('evilLaught', {
+    let music = this.sound.add("evilLaught", {
       volume: 1,
       loop: false,
     })
 
     music.play()
+    background.play("gameOverStart")
+    setTimeout(() => {
+      background.play("gameOverLoop")
+    }, 2000)
   }
 
   registerScore() {

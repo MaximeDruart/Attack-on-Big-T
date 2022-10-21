@@ -15,8 +15,8 @@ class Base extends Phaser.Physics.Arcade.Image {
     this.shieldSprite = scene.add.sprite(this.pos.x, this.pos.y, "base-shield").setScale(0.5)
     this.shieldSprite.alpha = 0
 
-    this.lives = 3
-    this.hp = 10
+    this.lives = 1
+    this.hp = 1
     this.isShieldActivated = false
   }
 

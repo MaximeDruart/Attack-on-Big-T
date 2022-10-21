@@ -1,5 +1,6 @@
 import menuBg from "/assets/img/MainMenu.png"
 import buttons from "/assets/img/buttons-screens.png"
+import menuSprite from "/assets/img/spritesheetMenu.png"
 import { center } from "../constants"
 import { gamepadEmulator, player1axis, player2axis } from "../axis"
 
@@ -12,6 +13,7 @@ class MenuScene extends Phaser.Scene {
     this.load.spritesheet("menuBg", menuBg, { frameWidth: 640, frameHeight: 360 })
     this.load.spritesheet("menu-button-start", buttons, { frameWidth: 132, frameHeight: 64 })
     this.load.spritesheet("menu-button-score", buttons, { frameWidth: 132, frameHeight: 64 })
+    this.load.spritesheet("menuSprite", menuSprite, { frameWidth: 640, frameHeight: 360 })
   }
 
   create() {
@@ -33,6 +35,12 @@ class MenuScene extends Phaser.Scene {
       frames: this.anims.generateFrameNumbers("menuBg", { start: 0, end: 1 }),
       repeat: -1,
     })
+    this.anims.create({
+      key: "menuSpriteAnim",
+      frameRate: 8,
+      frames: this.anims.generateFrameNumbers("menuSprite"),
+      repeat: -1,
+    })
 
     let background = this.add.sprite(0, 0, "menuBg")
     background.setOrigin(0, 0)
@@ -49,6 +57,8 @@ class MenuScene extends Phaser.Scene {
     this.keyDownFn2 = (e) => keyDownHandler(e, 2)
     player1axis.addEventListener("keydown", this.keyDownFn1)
     player2axis.addEventListener("keydown", this.keyDownFn2)
+
+    background.play("menuSpriteAnim")
   }
 
   keyDownHandler(e, playerNumber) {
