@@ -1,4 +1,4 @@
-class Laser extends Phaser.Physics.Arcade.Image {
+class Laser extends Phaser.Physics.Arcade.Sprite {
   constructor(scene) {
     super(scene, 0, 0, "laser")
 
@@ -15,6 +15,8 @@ class Laser extends Phaser.Physics.Arcade.Image {
     this.setActive(true)
     this.setDepth(1)
     this.setVisible(true)
+
+    this.play("laserAnim")
 
     this.updateLaserPosition(origin, dir)
     this.playAudio()
