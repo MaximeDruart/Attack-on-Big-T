@@ -22,7 +22,7 @@ class Laser extends Phaser.Physics.Arcade.Image {
 
   playAudio() {
     let sound = this.scene.sound.add("big_laser")
-    sound.setVolume(0.45)
+    sound.setVolume(0.8)
     sound.play()
   }
 
