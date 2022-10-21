@@ -33,7 +33,9 @@ import bulletSizeBonusImg from "/assets/img/LargeSheet.png"
 import slowTextImg from "/assets/img/SlowSheet.png"
 import reverseTextImg from "/assets/img/ReverseSheet.png"
 import boomTextImg from "/assets/img/BoomSheet.png"
+import blockTextImg from "/assets/img/BlockSheet.png"
 import slowTextAudio from "/assets/audios/boomText.mp3"
+import blockTextAudio from "/assets/audios/getReady.mp3"
 import reverseTextAudio from "/assets/audios/reverseText.mp3"
 import boomTextAudio from "/assets/audios/boomText.mp3"
 
@@ -97,9 +99,11 @@ class BootScene extends Phaser.Scene {
     this.load.spritesheet("slowTextImg", slowTextImg, { frameWidth: 2560 / 4, frameHeight: 1440 / 4 })
     this.load.spritesheet("reverseTextImg", reverseTextImg, { frameWidth: 2560 / 4, frameHeight: 1440 / 4 })
     this.load.spritesheet("boomTextImg", boomTextImg, { frameWidth: 2560 / 4, frameHeight: 1440 / 4 })
+    this.load.spritesheet("blockTextImg", blockTextImg, { frameWidth: 2560 / 4, frameHeight: 1440 / 4 })
     this.load.audio("slowTextImgAudio", slowTextAudio)
     this.load.audio("reverseTextImgAudio", reverseTextAudio)
     this.load.audio("boomTextImgAudio", boomTextAudio)
+    this.load.audio("blockTextImgAudio", blockTextAudio)
 
     this.load.spritesheet("e1000", e1000Img, { frameWidth: 32, frameHeight: 32 })
     this.load.spritesheet("base-shield", baseShieldImg, { frameWidth: 196, frameHeight: 98 })
@@ -357,6 +361,8 @@ class WorldScene extends Phaser.Scene {
       enemy.stats.attackSpeed = 15
     })
 
+    this.spawnText("blockTextImg")
+
     const randomKeyIndex = () => Math.floor(Math.random() * 4)
     const randomKeyIndexes = new Array(4).fill("").map(() => randomKeyIndex())
     const chars = ["a", "x", "i", "s"]
@@ -437,7 +443,7 @@ class WorldScene extends Phaser.Scene {
     this.fullScreenText.play(`${option}Anim`)
 
     let sound = this.sound.add(`${option}Audio`)
-    sound.setVolume(0.3)
+    sound.setVolume(2.5)
     sound.play()
 
     this.fullScreenText.on(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
