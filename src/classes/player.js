@@ -4,12 +4,14 @@ import randomAudio from "../randomAudio.js"
 import { Laser } from "./laser"
 import { bonusesStats } from "../constants"
 
-class Player extends Phaser.Physics.Arcade.Image {
+class Player extends Phaser.Physics.Arcade.Sprite {
   constructor(scene, x, y, playerNumber, linearPosition) {
-    super(scene, x, y, "turret")
+    const img = playerNumber === 1 ? "blueTurret" : "redTurret"
+    super(scene, x, y, img)
 
     this.playerNumber = playerNumber
     this.speed = 0.018
+    this.img = img
 
     scene.add.existing(this)
     scene.physics.add.existing(this)
@@ -98,7 +100,7 @@ class Player extends Phaser.Physics.Arcade.Image {
 
   setPositionFromLinear() {
     const az = this.linearPosition * Math.PI - Math.PI
-    const radius = this.base.height
+    const radius = this.base.height + 12
     let pos = new Phaser.Math.Vector2(0, 0)
     pos.setToPolar(az, radius)
     pos.add({ x: this.base.pos.x, y: this.base.pos.y + this.base.height / 2 })
@@ -138,10 +140,12 @@ class Player extends Phaser.Physics.Arcade.Image {
     if (time < this.lastFired) return
     const bullet = this.bullets.get()
     if (bullet) {
-      randomAudio(this.scene, ["laser_one", "laser_two"], 0.5)
+      randomAudio(this.scene, ["laser_one", "laser_two"], 0.3)
+      console.log(this)
+      this.play(this.img + "Anim")
+
       // up vector, rotate it by the angle of the cannon, the normalize it so speed can be applied and reverse to point outwards
       let bulletDirection = new Phaser.Math.Vector2(0, 1).rotate(this.cannonRotation).normalize().negate()
-
       bullet.setScale(this.cannonStats.bulletScale)
       bullet.fire({ x: this.x, y: this.y }, bulletDirection, this.cannonStats.fireSpeed)
       this.lastFired = time + this.cannonStats.fireDelay

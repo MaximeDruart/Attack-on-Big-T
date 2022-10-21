@@ -43,4 +43,8 @@ const player2axis = Axis.createPlayer({
   buttons: Axis.buttonManager.getButtonsById(2), // Give player 1 all buttons from group 2
 })
 
-export { gamepadEmulator, player1axis, player2axis }
+const leaderboard = Axis.createLeaderboard({
+  id: "BIG-T-7a05ef32-f5a1-41d4-89f2-dd34238b00d5",
+})
+
+export { gamepadEmulator, player1axis, player2axis, leaderboard }
