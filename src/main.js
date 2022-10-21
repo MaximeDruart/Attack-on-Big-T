@@ -1,6 +1,6 @@
 import Phaser from "phaser"
 
-import "./axis"
+import Axis from "axis-api"
 
 import "./style.css"
 import baseImg from "/assets/img/base.png"
@@ -15,6 +15,8 @@ import explosionImg from "/assets/img/explosions.png"
 
 import bgImg from "/assets/img/backgroundSheet.png"
 import turretImg from "/assets/img/turret.png"
+import redTurretImg from "/assets/img/redGun.png"
+import blueTurretImg from "/assets/img/blueGun.png"
 import laserImg from "/assets/img/laser.png"
 import bonusImg from "/assets/img/bonus.png"
 import ropeTileImg from "/assets/img/ropeTile.png"
@@ -61,10 +63,11 @@ import { Bonus } from "./classes/bonus"
 
 import MenuScene from "./scenes/MenuScene"
 import GameOverScene from "./scenes/GameOverScene"
+import ScoreScene from "./scenes/ScoreScene"
 
 import GrayScalePipeline from "./pipelines/grayScale"
 
-import { gamepadEmulator, player1axis, player2axis } from "./axis"
+import { gamepadEmulator, player1axis, player2axis, leaderboard } from "./axis"
 import { center, bonusesStatsKey } from "./constants"
 import { enemyData } from "./enemyData"
 import { mapRange } from "./utils"
@@ -78,6 +81,8 @@ class BootScene extends Phaser.Scene {
     this.load.image("base", baseImg)
     this.load.spritesheet("bg", bgImg, { frameWidth: 640, frameHeight: 360 })
     this.load.image("turret", turretImg)
+    this.load.spritesheet("blueTurret", blueTurretImg, { frameWidth: 48, frameHeight: 48 })
+    this.load.spritesheet("redTurret", redTurretImg, { frameWidth: 48, frameHeight: 48 })
     this.load.image("chaser", chaserImg)
     this.load.spritesheet("tardiTrail", tardiTrailImg, { frameWidth: 16, frameHeight: 16 })
     this.load.image("rat", ratImg)
@@ -134,6 +139,16 @@ class BootScene extends Phaser.Scene {
       frames: this.anims.generateFrameNumbers("bg"),
       repeat: -1,
       yoyo: true,
+    })
+    this.anims.create({
+      key: "blueTurretAnim",
+      frameRate: 20,
+      frames: this.anims.generateFrameNumbers("blueTurret"),
+    })
+    this.anims.create({
+      key: "redTurretAnim",
+      frameRate: 20,
+      frames: this.anims.generateFrameNumbers("redTurret"),
     })
     this.anims.create({
       key: "e1000-fly",
@@ -276,9 +291,9 @@ class WorldScene extends Phaser.Scene {
   constructor() {
     super("WorldScene")
   }
+
   setGameOver() {
-    // console.log(this.scene.start);
-    this.scene.start('GameOverScene') 
+    this.scene.start("GameOverScene", { score: this.score })
   }
   createPlayers() {
     this.players = this.physics.add.group({ classType: Player, runChildUpdate: true })
@@ -510,7 +525,7 @@ class WorldScene extends Phaser.Scene {
     this.bigT = this.add.sprite(center.x, center.y, "bigT")
     this.bigT.alpha = 0.8
     this.bigT.play("boss-idle")
-    this.base = new Base(this, center.x, center.y)
+    this.base = new Base(this, center.x, center.y, this.setGameOver.bind(this))
 
     this.waveNumber = 0
     this.waveKills = 0
@@ -548,7 +563,9 @@ class WorldScene extends Phaser.Scene {
 
   updateScore(inc) {
     this.score += inc
-    this.scoreText.setText(this.score.toString().padStart(6, "0"))
+    if (this.scoreText) {
+      this.scoreText.setText(this.score.toString().padStart(6, "0"))
+    }
   }
 
   createUI() {
@@ -1042,7 +1059,7 @@ const config = {
       debug: false,
     },
   },
-  scene: [BootScene, WorldScene, MenuScene, GameOverScene],
+  scene: [BootScene, WorldScene, MenuScene, GameOverScene, ScoreScene],
   pipeline: { Gray1: GrayScalePipeline, Gray2: GrayScalePipeline },
 }
 
