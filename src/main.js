@@ -231,6 +231,11 @@ class BootScene extends Phaser.Scene {
       frames: this.anims.generateFrameNumbers("reverseTextImg", { start: 0, end: 15 }),
     })
     this.anims.create({
+      key: "blockTextImgAnim",
+      frameRate: 15,
+      frames: this.anims.generateFrameNumbers("blockTextImg", { start: 0, end: 15 }),
+    })
+    this.anims.create({
       key: "boomTextImgAnim",
       frameRate: 15,
       frames: this.anims.generateFrameNumbers("boomTextImg", { start: 0, end: 15 }),
@@ -377,22 +382,23 @@ class WorldScene extends Phaser.Scene {
     })
 
     this.spawnText("blockTextImg")
-
-    const randomKeyIndex = () => Math.floor(Math.random() * 4)
-    const randomKeyIndexes = new Array(4).fill("").map(() => randomKeyIndex())
-    const chars = ["a", "x", "i", "s"]
-    this.sequence = [
-      { key: chars[randomKeyIndexes[0]], keyIndex: randomKeyIndexes[0], player: 1 },
-      { key: chars[randomKeyIndexes[1]], keyIndex: randomKeyIndexes[1], player: 2 },
-      { key: chars[randomKeyIndexes[2]], keyIndex: randomKeyIndexes[2], player: 1 },
-      { key: chars[randomKeyIndexes[3]], keyIndex: randomKeyIndexes[3], player: 2 },
-    ]
-    this.isListeningQTE = true
-    this.validatedPresses = []
-    this.createQTEVisuals()
-    this.qteTimer = setTimeout(() => {
-      this.onQTEFail()
-    }, qteTimerDuration * 1000)
+    this.fullScreenText.on(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
+      const randomKeyIndex = () => Math.floor(Math.random() * 4)
+      const randomKeyIndexes = new Array(4).fill("").map(() => randomKeyIndex())
+      const chars = ["a", "x", "i", "s"]
+      this.sequence = [
+        {key: chars[randomKeyIndexes[0]], keyIndex: randomKeyIndexes[0], player: 1},
+        {key: chars[randomKeyIndexes[1]], keyIndex: randomKeyIndexes[1], player: 2},
+        {key: chars[randomKeyIndexes[2]], keyIndex: randomKeyIndexes[2], player: 1},
+        {key: chars[randomKeyIndexes[3]], keyIndex: randomKeyIndexes[3], player: 2},
+      ]
+      this.isListeningQTE = true
+      this.validatedPresses = []
+      this.createQTEVisuals()
+      this.qteTimer = setTimeout(() => {
+        this.onQTEFail()
+      }, qteTimerDuration * 1000)
+    })
   }
 
   createQTEVisuals() {
