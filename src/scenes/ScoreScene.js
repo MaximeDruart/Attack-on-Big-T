@@ -3,8 +3,8 @@ import { leaderboard } from "../axis"
 class HighscoreScene extends Phaser.Scene {
   constructor() {
     super({ key: "HighscoreScene" })
-    console.log(leaderboard)
-    console.log(this.score)
+    // console.log(leaderboard)
+    // console.log(this.score)
   }
 
   fetchData() {}
