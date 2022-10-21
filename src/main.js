@@ -37,6 +37,8 @@ import slowTextAudio from "/assets/audios/boomText.mp3"
 import reverseTextAudio from "/assets/audios/reverseText.mp3"
 import boomTextAudio from "/assets/audios/boomText.mp3"
 
+import inGameAudio from "/assets/audios/inGameAudio.mp3"
+
 import laser_one from "/assets/audios/laser_one.mp3"
 import laser_two from "/assets/audios/laser_two.mp3"
 import explosion_two from "/assets/audios/explosion_two.mp3"
@@ -103,6 +105,8 @@ class BootScene extends Phaser.Scene {
     this.load.spritesheet("base-shield", baseShieldImg, { frameWidth: 196, frameHeight: 98 })
     this.load.spritesheet("explosion", explosionImg, { frameWidth: 32, frameHeight: 32 })
     this.load.spritesheet("buttons", buttonsImg, { frameWidth: 64, frameHeight: 64 })
+
+    this.load.audio("in-game-music", inGameAudio)
 
     this.load.audio("laser_one", laser_one)
     this.load.audio("laser_two", laser_two)
@@ -241,9 +245,18 @@ class BootScene extends Phaser.Scene {
     })
   }
 
+  startMusic() {
+    let music = this.sound.add('in-game-music',{
+      loop: true
+    });
+    music.play()
+  }
+
   create() {
     this.createAnims()
-    this.scene.start("MenuScene")
+    // this.scene.start("MenuScene")
+    this.scene.start("WorldScene")
+    this.startMusic()
   }
 }
 

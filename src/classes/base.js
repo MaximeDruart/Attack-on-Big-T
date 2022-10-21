@@ -1,7 +1,7 @@
 import { resolutionMultiplicator, center } from "../constants"
 
 class Base extends Phaser.Physics.Arcade.Image {
-  constructor(scene, x, y) {
+  constructor(scene, x, y, setGameOver) {
     super(scene, x, y, "base")
 
     // base image handling
@@ -56,6 +56,7 @@ class Base extends Phaser.Physics.Arcade.Image {
 
       if (this.lives <= 0) {
         // game over
+        this.setGameOver()
       }
     }
   }
