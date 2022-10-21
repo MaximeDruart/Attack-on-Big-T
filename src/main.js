@@ -55,6 +55,9 @@ import { Base } from "./classes/base"
 import { Enemy } from "./classes/enemy"
 import { Bonus } from "./classes/bonus"
 
+import MenuScene from "./scenes/MenuScene"
+import GameOverScene from "./scenes/GameOverScene"
+
 import GrayScalePipeline from "./pipelines/grayScale"
 
 import { gamepadEmulator, player1axis, player2axis } from "./axis"
@@ -240,7 +243,7 @@ class BootScene extends Phaser.Scene {
 
   create() {
     this.createAnims()
-    this.scene.start("WorldScene")
+    this.scene.start("MenuScene")
   }
 }
 
@@ -1008,7 +1011,7 @@ const config = {
       debug: false,
     },
   },
-  scene: [BootScene, WorldScene],
+  scene: [BootScene, WorldScene, MenuScene, GameOverScene],
   pipeline: { Gray1: GrayScalePipeline, Gray2: GrayScalePipeline },
 }
 
