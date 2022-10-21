@@ -1,5 +1,5 @@
 // import GameOverBg from "/assets/img/GameOver.png"
-import GameOverBg from "/assets/img/MainMenu.png"
+import GameOverBg from "/assets/img/GameOver.png"
 import buttons from "/assets/img/buttons-screens.png"
 import { center } from "../constants"
 import { gamepadEmulator, player1axis, player2axis } from "../axis"

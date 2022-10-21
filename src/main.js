@@ -519,7 +519,7 @@ class WorldScene extends Phaser.Scene {
     this.bigT = this.add.sprite(center.x, center.y, "bigT")
     this.bigT.alpha = 0.8
     this.bigT.play("boss-idle")
-    this.base = new Base(this, center.x, center.y, this.setGameOver)
+    this.base = new Base(this, center.x, center.y, this.setGameOver.bind(this))
 
     this.waveNumber = 0
     this.waveKills = 0
