@@ -254,8 +254,8 @@ class BootScene extends Phaser.Scene {
 
   create() {
     this.createAnims()
-    // this.scene.start("MenuScene")
-    this.scene.start("WorldScene")
+    this.scene.start("MenuScene")
+    // this.scene.start("WorldScene")
     this.startMusic()
   }
 }
@@ -264,7 +264,10 @@ class WorldScene extends Phaser.Scene {
   constructor() {
     super("WorldScene")
   }
-
+  setGameOver() {
+    // console.log(this.scene.start);
+    this.scene.start('GameOverScene') 
+  }
   createPlayers() {
     this.players = this.physics.add.group({ classType: Player, runChildUpdate: true })
 

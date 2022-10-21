@@ -8,7 +8,7 @@ class Base extends Phaser.Physics.Arcade.Image {
     this.baseScale = 1
     this.width = 96 * this.baseScale
     this.height = this.width / 2
-
+    this.setGameOver = setGameOver
     this.pos = { x: center.x, y: 360 - this.height / 2 }
     scene.physics.add.image(this.pos.x, this.pos.y, "base").setScale(this.baseScale)
 
