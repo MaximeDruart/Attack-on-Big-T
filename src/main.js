@@ -15,6 +15,13 @@ import e1000Img from "/assets/img/e1000.png"
 import ratImg from "/assets/img/rat.png"
 import explosionImg from "/assets/img/explosions.png"
 
+import shieldBlueImg from "/assets/img/shieldBlue.png"
+import shieldRedImg from "/assets/img/shieldRed.png"
+
+import iconGunBlueImg from "/assets/img/iconGunBlue.png"
+import iconGunRedImg from "/assets/img/iconGunRed.png"
+import iconLaserImg from "/assets/img/iconLaser.png"
+
 import bgImg from "/assets/img/backgroundSheet.png"
 import turretImg from "/assets/img/turret.png"
 import redTurretImg from "/assets/img/redGun.png"
@@ -95,6 +102,12 @@ class BootScene extends Phaser.Scene {
     this.load.image("rat", ratImg)
     this.load.image("bullet", bulletImg)
     this.load.image("dent", dentImg)
+
+    this.load.image("shieldBlue", shieldBlueImg)
+    this.load.image("shieldRed", shieldRedImg)
+    this.load.image("iconGunBlue", iconGunBlueImg)
+    this.load.image("iconGunRed", iconGunRedImg)
+    this.load.image("iconLaser", iconLaserImg)
 
     this.load.spritesheet("laser", laserImg, { frameWidth: 1280 / 2, frameHeight: 1440 / 2 })
     this.load.image("bonus", bonusImg)
@@ -628,23 +641,36 @@ class WorldScene extends Phaser.Scene {
     this.grayscalePipelineShield = this.renderer.pipelines.get("Gray1")
     this.grayscalePipelineShield.gray = 0
 
-    this.shieldIcon = this.add.sprite(50, 250, "shieldIcon").setPipeline(this.grayscalePipelineShield)
-    this.shieldIconGraphics = this.add.graphics({ x: this.shieldIcon.x, y: this.shieldIcon.y })
+    this.iconGunRed = this.add.sprite(30, 330, "iconGunRed")
+    this.iconGunBlue = this.add.sprite(530, 330, "iconGunBlue")
 
-    this.shieldIconGraphics.fillStyle(color, alpha)
-    this.shieldIconGraphics.fillRect(
-      -this.shieldIcon.width / 2,
-      -this.shieldIcon.height / 2,
-      this.shieldIcon.width,
-      this.shieldIcon.height * 0
+    this.shieldIconRed = this.add.sprite(70, 330, "shieldRed").setPipeline(this.grayscalePipelineShield)
+    this.shieldIconRedGraphics = this.add.graphics({ x: this.shieldIconRed.x, y: this.shieldIconRed.y })
+    this.shieldIconBlue = this.add.sprite(570, 330, "shieldBlue").setPipeline(this.grayscalePipelineShield)
+    this.shieldIconBlueGraphics = this.add.graphics({ x: this.shieldIconBlue.x, y: this.shieldIconBlue.y })
+
+    this.shieldIconBlueGraphics.fillStyle(color, alpha)
+    this.shieldIconBlueGraphics.fillRect(
+      -this.shieldIconRed.width / 2,
+      -this.shieldIconRed.height / 2,
+      this.shieldIconRed.width,
+      this.shieldIconRed.height * 0
+    )
+    this.shieldIconRedGraphics.fillStyle(color, alpha)
+    this.shieldIconRedGraphics.fillRect(
+      -this.shieldIconRed.width / 2,
+      -this.shieldIconRed.height / 2,
+      this.shieldIconRed.width,
+      this.shieldIconRed.height * 0
     )
 
-    this.shieldIconGraphics.setBlendMode(Phaser.BlendModes.DIFFERENCE)
+    this.shieldIconBlueGraphics.setBlendMode(Phaser.BlendModes.DIFFERENCE)
+    this.shieldIconRedGraphics.setBlendMode(Phaser.BlendModes.DIFFERENCE)
 
     this.grayscalePipelineLaser = this.renderer.pipelines.get("Gray2")
     this.grayscalePipelineLaser.gray = 0
 
-    this.laserIcon = this.add.sprite(150, 250, "laserIcon").setPipeline(this.grayscalePipelineLaser)
+    this.laserIcon = this.add.sprite(170, 330, "iconLaser").setPipeline(this.grayscalePipelineLaser)
     this.laserIconGraphics = this.add.graphics({ x: this.laserIcon.x, y: this.laserIcon.y })
 
     this.laserIconGraphics.fillStyle(color, alpha)
@@ -671,12 +697,19 @@ class WorldScene extends Phaser.Scene {
       }
 
       const percentage = this.shieldRemainingCooldown / this.shieldCooldown
-      this.shieldIconGraphics.clear()
-      this.shieldIconGraphics.fillRect(
-        -this.shieldIcon.width / 2,
-        -this.shieldIcon.height / 2,
-        this.shieldIcon.width,
-        this.shieldIcon.height * percentage
+      this.shieldIconBlueGraphics.clear()
+      this.shieldIconBlueGraphics.fillRect(
+        -this.shieldIconBlue.width / 2,
+        -this.shieldIconBlue.height / 2,
+        this.shieldIconBlue.width,
+        this.shieldIconBlue.height * percentage
+      )
+      this.shieldIconRedGraphics.clear()
+      this.shieldIconRedGraphics.fillRect(
+        -this.shieldIconRed.width / 2,
+        -this.shieldIconRed.height / 2,
+        this.shieldIconRed.width,
+        this.shieldIconRed.height * percentage
       )
     }
     if (this.shieldRemainingCooldown === 0 && this.grayscalePipelineShield.gray !== 0) {
@@ -685,11 +718,18 @@ class WorldScene extends Phaser.Scene {
         duration: 250,
         gray: 0,
       })
-      this.shieldIconGraphics.clear()
-      this.shieldIconGraphics.fillRect(
-        -this.shieldIcon.width / 2,
-        -this.shieldIcon.height / 2,
-        this.shieldIcon.width,
+      this.shieldIconRedGraphics.clear()
+      this.shieldIconRedGraphics.fillRect(
+        -this.shieldIconRed.width / 2,
+        -this.shieldIconRed.height / 2,
+        this.shieldIconRed.width,
+        0
+      )
+      this.shieldIconBlueGraphics.clear()
+      this.shieldIconBlueGraphics.fillRect(
+        -this.shieldIconBlue.width / 2,
+        -this.shieldIconBlue.height / 2,
+        this.shieldIconBlue.width,
         0
       )
     }
