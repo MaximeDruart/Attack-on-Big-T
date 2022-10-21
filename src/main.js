@@ -320,6 +320,13 @@ class WorldScene extends Phaser.Scene {
   }
 
   setGameOver() {
+    player1axis.removeEventListener("joystick:move", this.joystick1HandlerBinded)
+    player2axis.removeEventListener("joystick:move", this.joystick2HandlerBinded)
+
+    player1axis.removeEventListener("keydown", this.keyDownFn1)
+    player2axis.removeEventListener("keydown", this.keyDownFn2)
+    player1axis.removeEventListener("keyup", this.keyUpFn1)
+    player2axis.removeEventListener("keyup", this.keyUpFn2)
     this.sound.pauseAll()
     this.scene.start("GameOverScene", { score: this.score })
   }
@@ -553,7 +560,6 @@ class WorldScene extends Phaser.Scene {
     this.bg = this.add.sprite(0, 0, "bg").setOrigin(0, 0)
     this.bg.play("bg")
     this.bigT = this.add.sprite(center.x, center.y, "bigT")
-    this.bigT.alpha = 0.8
     this.bigT.play("boss-idle")
     this.base = new Base(this, center.x, center.y, this.setGameOver.bind(this))
 
@@ -811,16 +817,22 @@ class WorldScene extends Phaser.Scene {
     this.laserSyncRemainingTime = this.laserSyncWindow
     this.laserRemainingCooldown = 0
 
-    player1axis.addEventListener("joystick:move", this.player1JoystickMoveHandler.bind(this))
-    player2axis.addEventListener("joystick:move", this.player2JoystickMoveHandler.bind(this))
+    this.joystick1HandlerBinded = this.player1JoystickMoveHandler.bind(this)
+    this.joystick2HandlerBinded = this.player2JoystickMoveHandler.bind(this)
+    player1axis.addEventListener("joystick:move", this.joystick1HandlerBinded)
+    player2axis.addEventListener("joystick:move", this.joystick2HandlerBinded)
 
     const keyDownHandler = this.keyDownHandler.bind(this)
-    player1axis.addEventListener("keydown", (e) => keyDownHandler(e, 1))
-    player2axis.addEventListener("keydown", (e) => keyDownHandler(e, 2))
+    this.keyDownFn1 = (e) => keyDownHandler(e, 1)
+    this.keyDownFn2 = (e) => keyDownHandler(e, 2)
+    player1axis.addEventListener("keydown", this.keyDownFn1)
+    player2axis.addEventListener("keydown", this.keyDownFn2)
 
     const keyUpHandler = this.keyUpHandler.bind(this)
-    player1axis.addEventListener("keyup", (e) => keyUpHandler(e, 1))
-    player2axis.addEventListener("keyup", (e) => keyUpHandler(e, 2))
+    this.keyUpFn1 = (e) => keyUpHandler(e, 1)
+    this.keyUpFn2 = (e) => keyUpHandler(e, 2)
+    player1axis.addEventListener("keyup", this.keyUpFn1)
+    player2axis.addEventListener("keyup", this.keyUpFn2)
   }
 
   player1JoystickMoveHandler(e) {
@@ -1068,6 +1080,10 @@ class WorldScene extends Phaser.Scene {
     this.handleLaser(time, delta)
 
     this.updateUI()
+
+    // anims
+
+    this.bigT.setPosition(center.x, center.y + Math.sin(time * 0.001) * 10)
   }
 }
 
